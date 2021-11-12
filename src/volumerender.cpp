@@ -57,7 +57,11 @@ VolumeRender::VolumeRender(char *rawFile)
 void VolumeRender::render(Matrix4f VP)
 {
     glUseProgram(ShaderProgram);
-    glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &VP.m[0][0]);
+    Matrix4f trans;
+    trans.InitIdentity();
+    trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
+    trans = VP * trans;
+    glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
     glUniform1f(gIsoVal, isoVal);
     glBindVertexArray(VAO);
     // wire frame

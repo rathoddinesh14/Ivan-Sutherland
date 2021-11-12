@@ -11,7 +11,7 @@
 #include "include/common/camera.h"
 #include "include/common/cube.h"
 #include "include/common/volumerender.h"
-
+#include "include/common/arcball.h"
 #include "include/common/ui.h"
 
 using namespace std;
@@ -20,6 +20,7 @@ using namespace std;
 /*   Variables */
 
 ui::UI* gui;
+ArcBall *arcball;
 
 char *theProgramTitle = "Volume rendering";
 int theWindowWidth = 700, theWindowHeight = 700;
@@ -96,6 +97,7 @@ void onInit(int argc, char *argv[])
 
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
+	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
 }
 
 static void onDisplay()
@@ -107,11 +109,11 @@ static void onDisplay()
 	camera.onRender();
 	Matrix4f Proj;
 	Proj.InitPersProjTransform(persProjInfo);
+	Matrix4f MVP;
+	MVP = Proj * camera.getMatrix() * arcball->getRotationMatrix();
 
-	Proj = Proj * camera.getMatrix();
-
-	volumeRender->render(Proj);
-	boundingBox->render(Proj);
+	volumeRender->render(MVP);
+	boundingBox->render(MVP);
 
 	gui->widget();
 	gui->render();
@@ -174,6 +176,7 @@ static void onMouseMotion(int x, int y)
 	/* notify window that it has to be re-rendered */
 	// camera.handleMouse(x, y);
 	ImGui_ImplGLUT_MotionFunc(x, y);
+	arcball->handleCursor(x, y);
 	glutPostRedisplay();
 }
 
@@ -189,7 +192,10 @@ static void onMouseButtonPress(int button, int state, int x, int y)
 	{
 		// Left button un pressed
 	}
+
 	ImGui_ImplGLUT_MouseFunc(button, state, x, y);
+	arcball->handleMouseButton(button, state, x, y);
+
 	/* notify window that it has to be re-rendered */
 	glutPostRedisplay();
 }
@@ -240,10 +246,12 @@ static void onSpecialKeyPress(int key, int x, int y)
 			theWindowPositionY = glutGet((GLenum)(GLUT_WINDOW_Y));
 			glutFullScreen();
 			glViewport(0, 0, 1920, 1080);
+			arcball->updateWindowSize(1920, 1080);
 		}
 		else
 		{
 			glViewport(0, 0, theWindowWidth, theWindowHeight);
+			arcball->updateWindowSize(theWindowWidth, theWindowHeight);
 			glutPositionWindow(theWindowPositionX, theWindowPositionY);
 		}
 		break;
@@ -271,7 +279,7 @@ static void onVisible(int state)
 // handles mouse movemnt without pressing any button
 static void PassiveMouseCB(int x, int y)
 {
-	camera.handleMouse(x, y);
+	// camera.handleMouse(x, y);
 }
 
 static void InitializeGlutCallbacks()
