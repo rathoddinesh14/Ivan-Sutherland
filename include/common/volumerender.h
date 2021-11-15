@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "rawfileparser.h"
 #include "marchingtetrahedra.h"
+#include "lightsource.h"
 
 class VolumeRender
 {
@@ -23,6 +24,10 @@ class VolumeRender
     int moveY = 0;
     Vector3f *vertices;
     vector<Vector3f> isoPoints;
+    GLuint gAmbientIntensityLoc, glightSrcLoc, gDiffuseIntensityLoc, gSpecLightLoc, gSpecPowerLoc, gWorldTrans, gCamLoc;
+    float ambientLight = 0.3f, diffuseLight = 0.0f, specularLight = 0.5f, shininess = 32.0f;
+    Vector3f cameraPos;
+    LightSource *lightSrc;
 
 public:
     VolumeRender(char *rawFile);
@@ -43,6 +48,9 @@ public:
     // after getting new iso points from marching cube, update the ibo
     void updateVBO();
 
+    void setLightSrc(LightSource *lightSrc);
+
+    void setCameraPos(Vector3f cameraPos);
 };
 
 #endif

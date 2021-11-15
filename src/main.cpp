@@ -10,8 +10,9 @@
 #include "include/common/math_utils.h"
 #include "include/common/camera.h"
 #include "include/common/cube.h"
+#include "include/common/boundingbox.h"
+#include "include/common/lightsource.h"
 #include "include/common/volumerender.h"
-
 #include "include/common/ui.h"
 
 using namespace std;
@@ -40,6 +41,7 @@ float FOV = 90.0f, zNear = 1.0f, zFar = 100.0f;
 PersProjInfo persProjInfo = {FOV, theWindowWidth, theWindowHeight, zNear, zFar};
 GLuint ShaderProgram, texProgram;
 Cube *boundingBox = 0;
+LightSource *lightsrc = 0;
 VolumeRender *volumeRender = 0;
 
 // camera
@@ -90,7 +92,11 @@ void onInit(int argc, char *argv[])
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	volumeRender = new VolumeRender(rawFile);
-	boundingBox = new Cube();
+	boundingBox = new BoundingBox();
+	lightsrc = new LightSource();
+	lightsrc->setPosition(Vector3f(-0.3f, 1.5f, 0.0f));
+	volumeRender->setLightSrc(lightsrc);
+	volumeRender->setCameraPos(camera.getPos());
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -112,6 +118,14 @@ static void onDisplay()
 
 	volumeRender->render(Proj);
 	boundingBox->render(Proj);
+
+	// move light source along y-axis
+	lightsrc->setPosition(Vector3f(lightsrc->getPosition().x,
+									lightsrc->getPosition().y - 0.05 * sin(25*rotation),
+									lightsrc->getPosition().z));
+
+
+	lightsrc->render(Proj);
 
 	gui->widget();
 	gui->render();
