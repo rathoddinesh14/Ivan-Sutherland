@@ -61,6 +61,20 @@ void ui::UI::widget()
         volumeRender->updateVBO();
     }
 
+    // drop down menu
+    static int selected_item = 0;
+    static const char *items[] = {"Naive technique", "Domain search technique"};
+    ImGui::Combo("Algorithm", &selected_item, items, IM_ARRAYSIZE(items));
+
+    if (selected_item == 0)
+    {
+        volumeRender->setAlgo(0);
+    }
+    else if (selected_item == 1)
+    {
+        volumeRender->setAlgo(1);
+    }
+
     ImGui::End();
 }
 
