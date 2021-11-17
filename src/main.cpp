@@ -100,6 +100,10 @@ void onInit(int argc, char *argv[])
 
 	glEnable(GL_DEPTH_TEST);
 
+    // cull back faces
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
 }

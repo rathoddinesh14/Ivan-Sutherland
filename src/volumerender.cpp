@@ -9,7 +9,13 @@ VolumeRender::VolumeRender(char *rawFile)
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+    // float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+    width = 3;
+    height = 3;
+    depth = 3;
+    minVal = 4;
+    maxVal = 14;
+    float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
 
     isoVal = minVal;
     stepSize = (maxVal - minVal) / 100;
@@ -49,7 +55,7 @@ VolumeRender::VolumeRender(char *rawFile)
     glBindVertexArray(0);
 
     // clear the data
-    delete[] data;
+    // delete[] data;
 
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
@@ -88,10 +94,12 @@ void VolumeRender::render(Matrix4f VP)
     // point size is set to 5
     // glPointSize(5);
     // cout << "isoPoints size: " << isoPoints.size() << endl;
+
     glDrawArrays(GL_TRIANGLES, 0, isoPoints.size());
     // glDrawElements(GL_POINTS, depth * width * height, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     glUseProgram(0);
 }
 
@@ -147,7 +155,7 @@ void VolumeRender::updateVBO()
                     Vector3f p3 = points[l + 2];
 
                     // compute the normal of the triangle
-                    Vector3f normal = (p2 - p1).Cross(p3 - p1);
+                    Vector3f normal = (p3 - p1).Cross(p2 - p1);
                     normal.Normalize();
 
                     // add the vertices to the isoPoints vector
