@@ -26,9 +26,54 @@
 #include <iostream>
 #include <stdlib.h>
 #include <cstring>
+#include <vector>
 
 #define ToRadian(x) (float)(((x) * M_PI / 180.0f))
 #define ToDegree(x) (float)(((x) * 180.0f / M_PI))
+
+// function which returns min and max pair from 8 elements
+static std::pair<float, float> getMinMax(float x1, float x2, float x3, float x4, float x5, float x6, float x7, float x8)
+{
+    float min = x1;
+    float max = x1;
+
+    if (x2 < min)
+        min = x2;
+    if (x2 > max)
+        max = x2;
+
+    if (x3 < min)
+        min = x3;
+    if (x3 > max)
+        max = x3;
+
+    if (x4 < min)
+        min = x4;
+    if (x4 > max)
+        max = x4;
+
+    if (x5 < min)
+        min = x5;
+    if (x5 > max)
+        max = x5;
+
+    if (x6 < min)
+        min = x6;
+    if (x6 > max)
+        max = x6;
+
+    if (x7 < min)
+        min = x7;
+    if (x7 > max)
+        max = x7;
+
+    if (x8 < min)
+        min = x8;
+    if (x8 > max)
+        max = x8;
+
+    return std::make_pair(min, max);
+}
 
 inline float RandomFloat() {
 	float Max = RAND_MAX;

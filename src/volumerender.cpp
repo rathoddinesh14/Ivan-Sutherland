@@ -11,6 +11,8 @@ VolumeRender::VolumeRender(char *rawFile)
 
     float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
 
+    domainSearch = new DomainSearch(width, height, depth, data);
+
     isoVal = minVal;
     stepSize = (maxVal - minVal) / 100;
     vertices = new Vector3f[2 * depth * width * height];
@@ -52,6 +54,15 @@ VolumeRender::VolumeRender(char *rawFile)
     gIsoVal = glGetUniformLocation(ShaderProgram, "isoValue");
 
     updateVBO();
+}
+
+VolumeRender::~VolumeRender()
+{
+    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteProgram(ShaderProgram);
+    delete domainSearch;
+    delete[] vertices;
 }
 
 void VolumeRender::render(Matrix4f VP)
@@ -101,25 +112,56 @@ float VolumeRender::getMaxVal() const
     return this->maxVal;
 }
 
+void VolumeRender::setAlgo(int algo)
+{
+    this->algo = algo;
+}
+
 void VolumeRender::updateVBO()
 {
     isoPoints.clear();
-    for (int i = 0; i < depth - 1; i++)
+    // calculate the execution time
+    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
+    if (algo == 0)
     {
-        for (int j = 0; j < height - 1; j++)
+        // marching tetrahedra
+        for (int i = 0; i < depth - 1; i++)
         {
-            for (int k = 0; k < width - 1; k++)
+            for (int j = 0; j < height - 1; j++)
             {
-                int index = i * width * height + j * width + k;
-
-                for (auto p : marchingtetrahedra::getIsoPoints(isoVal, index, vertices, width, height))
+                for (int k = 0; k < width - 1; k++)
                 {
-                    isoPoints.push_back(p);
-                    // p.Print();
+                    int index = i * width * height + j * width + k;
+
+                    for (auto p : marchingtetrahedra::getIsoPoints(isoVal, index, vertices, width, height))
+                    {
+                        isoPoints.push_back(p);
+                        // p.Print();
+                    }
                 }
             }
         }
     }
+    else
+    {
+        // domain search
+        // get nodes in the octree
+        vector<Node *> nodes = domainSearch->getNodes(isoVal);
+        for (auto node : nodes)
+        {
+            for (auto p : marchingtetrahedra::getIsoPoints(isoVal, node->index, vertices, width, height))
+            {
+                isoPoints.push_back(p);
+            }
+        }
+    }
+    chrono::steady_clock::time_point end = chrono::steady_clock::now();
+    chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(end - begin);
+    std::cout << "execution time: " << time_span.count() * 1000 << " ms" << std::endl;
+
+    // print number of iso points
+    std::cout << "isoPoints size: " << isoPoints.size() << std::endl;
+
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, isoPoints.size() * sizeof(Vector3f), &isoPoints[0], GL_STATIC_DRAW);
