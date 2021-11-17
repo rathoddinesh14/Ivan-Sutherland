@@ -16,3 +16,4 @@ E0 271 Graphics and Visualisation Project
     4. https://klacansky.com/open-scivis-datasets/
     5. http://paulbourke.net/geometry/polygonise/
     6. https://github.com/kbinani/colormap-shaders/blob/master/shaders/glsl/IDL_Blue-Red_2.frag
+    7. https://github.com/subokita/Arcball/tree/master/Arcball
