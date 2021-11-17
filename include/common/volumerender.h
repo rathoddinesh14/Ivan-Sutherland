@@ -8,6 +8,8 @@
 #include "rawfileparser.h"
 #include "marchingtetrahedra.h"
 #include "lightsource.h"
+#include "domainsearch.h"
+#include "chrono"
 
 class VolumeRender
 {
@@ -28,9 +30,12 @@ class VolumeRender
     float ambientLight = 0.3f, diffuseLight = 0.0f, specularLight = 0.5f, shininess = 32.0f;
     Vector3f cameraPos;
     LightSource *lightSrc;
+    DomainSearch *domainSearch;
+    int algo = 0;   // marching tetrahedra is default
 
 public:
     VolumeRender(char *rawFile);
+    ~VolumeRender();
 
     // create ibo for slice
     void createIBO(char axis, int slice);
@@ -44,6 +49,8 @@ public:
 
     float getMinVal() const;
     float getMaxVal() const;
+
+    void setAlgo(int algo);
 
     // after getting new iso points from marching cube, update the ibo
     void updateVBO();
