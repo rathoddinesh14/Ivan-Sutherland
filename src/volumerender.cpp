@@ -82,17 +82,15 @@ VolumeRender::~VolumeRender()
     delete[] vertices;
 }
 
-void VolumeRender::render(Matrix4f VP)
+void VolumeRender::render(Matrix4f VP, Matrix4f Model)
 {
     glUseProgram(ShaderProgram);
-    Matrix4f localTrans;
-    localTrans.InitIdentity();
-    glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &localTrans.m[0][0]);
-    glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &VP.m[0][0]);
     Matrix4f trans;
     trans.InitIdentity();
     trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
     trans = VP * trans;
+    Model = Model * trans;
+    glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &Model.m[0][0]);
     glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
     glUniform1f(gIsoVal, isoVal);
     glUniform1f(gAmbientIntensityLoc, ambientLight);

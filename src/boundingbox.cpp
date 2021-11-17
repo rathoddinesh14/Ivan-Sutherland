@@ -28,8 +28,8 @@ void BoundingBox::render(const Matrix4f &VP)
     glUseProgram(program);
     Matrix4f trans, scaleMat;
     scaleMat.InitScaleTransform(1.01f, 1.01f, 1.01f);
-    trans.InitTranslationTransform(0.5f, 0.5f, 0.5f);
-    MVP = VP * trans * scaleMat;
+    // trans.InitTranslationTransform(0.5f, 0.5f, 0.5f);
+    MVP = VP * scaleMat;
     glUniformMatrix4fv(gWorLoc, 1, GL_TRUE, &MVP.m[0][0]);
     glBindVertexArray(cubeVAO);
     // draw cube using lines

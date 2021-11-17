@@ -103,8 +103,8 @@ void onInit(int argc, char *argv[])
 	glEnable(GL_DEPTH_TEST);
 
     // cull back faces
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
 
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
@@ -123,16 +123,16 @@ static void onDisplay()
 	Matrix4f MVP;
 	MVP = Proj * camera.getMatrix() * arcball->getRotationMatrix();
 
-	volumeRender->render(MVP);
+	volumeRender->render(MVP, arcball->getRotationMatrix());
 	boundingBox->render(MVP);
 
 	// move light source along y-axis
-	lightsrc->setPosition(Vector3f(lightsrc->getPosition().x,
-									lightsrc->getPosition().y - 0.05 * sin(25*rotation),
-									lightsrc->getPosition().z));
+	// lightsrc->setPosition(Vector3f(lightsrc->getPosition().x,
+	// 								lightsrc->getPosition().y - 0.05 * sin(25*rotation),
+	// 								lightsrc->getPosition().z));
 
 
-	lightsrc->render(Proj);
+	lightsrc->render(Proj * camera.getMatrix());
 
 	gui->widget();
 	gui->render();

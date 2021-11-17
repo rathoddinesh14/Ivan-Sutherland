@@ -40,7 +40,7 @@ public:
     // create ibo for slice
     void createIBO(char axis, int slice);
 
-    void render(Matrix4f VP);
+    void render(Matrix4f VP, Matrix4f Model);
 
     void handleKeyboard(unsigned char key);
 
