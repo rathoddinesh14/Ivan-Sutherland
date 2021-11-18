@@ -49,7 +49,7 @@ Camera::Camera(int w, int h):
 	Vector3f localWidth = pos - tar;
 	float windowSize = localWidth.length() * tanf(fov / 2);
 	right = (Up.Cross(windowSize)).Normalize() * windowSize;
-	Up = (localWidth.Cross(right)).Normalize()* windowSize;
+	// Up = (localWidth.Cross(right)).Normalize()* windowSize;
 }
 void Camera::rotate(const Vector3f& axis, float angle)
 {

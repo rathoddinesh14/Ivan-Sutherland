@@ -1,14 +1,21 @@
 #ifndef __ISOSURFACE_H
 #define __ISOSURFACE_H
 
+#include "../algorithm/node.h"
+#include "math_utils.h"
+#include "intersectable.h"
+
 #pragma once
 class IsoSurface : public Intersectable {
-	Node*root;
+	Node* root;
+	Material* material;
+
 public:
-	IsoSurce(Node*_root, Material* _material) {
+	IsoSurface(Node*_root, Material* _material) {
 		root(_root);
 		material(_material);
 	}
+
 	float getA(Node*node,
 			float u0b, float v0b, float w0b,
 			float u1b, float v1b, float w1b,
@@ -19,6 +26,7 @@ public:
 				u0b*v1b*w1b*iso_011 + u1b*v0b*w0b*iso_100 + u1b*v0b*w1b*iso_101 +
 				u1b*v1b*w0b*iso_110 + u1b*v1b*w1b*iso_111;
 	}
+
 	float getB(Node*node,
 			float u0a, float v0a, float w0a,
 			float u0b, float v0b, float w0b,
@@ -35,6 +43,7 @@ public:
 				(u1a*v1b*w0b + u1b*v1a*w0b + u1b*v1b*w0a)*iso_110 +
 				(u1a*v1b*w1b + u1b*v1a*w1b + u1b*v1b*w1a)*iso_111;
 	}
+
 	float getC(Node*node,
 			float u0a, float v0a, float w0a,
 			float u0b, float v0b, float w0b,
@@ -51,6 +60,7 @@ public:
 				(u1b*v1a*w0a + u1a*v1b*w0a + u1a*v1a*w0b)*iso_110 +
 				(u1b*v1a*w1a + u1a*v1b*w1a + u1a*v1a*w1b)*iso_111;
 	}
+
 	float getD(Node*node,
 			float u0a, float v0a, float w0a,
 			float u1a, float v1a, float w1a,
@@ -61,7 +71,8 @@ public:
 				u0a*v1a*w1a*iso_011 + u1a*v0a*w0a*iso_100 + u1a*v0a*w1a*iso_101 +
 				u1a*v1a*w0a*iso_110 + u1a*v1a*w1a*iso_111 - iso;
 	}
-	Hit intersectVoxel(const Ray&ray, Node*node){
+
+	Hit intersectVoxel(const Ray&ray, Node*node, Vector3f *vertices, int w, int h){
 		Hit hit;
 		float x0, y0, z0;
 		float x1, y1, z1;
@@ -93,6 +104,16 @@ public:
 		/*
 		 * Get isovalue of the eight vertices of the voxel here.
 		 */
+		int p = w*h;
+		float iso_000 = vertices[2 * node->index + 1].z;
+		float iso_001 = vertices[2 * (node->index + 1) + 1].z;
+		float iso_010 = vertices[2 * (node->index + w + 1) + 1].z;
+		float iso_011 = vertices[2 * (node->index + w) + 1].z;
+		float iso_100 = vertices[2 * (node->index + p) + 1].z;
+		float iso_101 = vertices[2 * (node->index + p + 1) + 1].z;
+		float iso_110 = vertices[2 * (node->index + p + w + 1) + 1].z;
+		float iso_111 = vertices[2 * (node->index + p + w) + 1].z;
+
 		c[0] = getA();
 		c[1] = getB();
 		c[2] = getC();
