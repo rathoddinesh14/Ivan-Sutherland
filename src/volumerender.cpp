@@ -9,13 +9,13 @@ VolumeRender::VolumeRender(char *rawFile)
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
-    width = 3;
-    height = 3;
-    depth = 3;
-    minVal = 4;
-    maxVal = 14;
-    float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
+    float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+    // width = 3;
+    // height = 3;
+    // depth = 3;
+    // minVal = 4;
+    // maxVal = 14;
+    // float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
 
     domainSearch = new DomainSearch(width, height, depth, data);
 
