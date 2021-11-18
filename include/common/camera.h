@@ -7,9 +7,17 @@
 #include <GL/freeglut.h>
 #include "quaternion.h"
 
+struct Ray {
+	Vector3f start, dir;
+	Ray(Vector3f _start, Vector3f _dir) {
+		start = _start;
+		dir = _dir.Normalize();
+	}
+};
+
 class Camera
 {
-    Vector3f pos, tar, Up;
+    Vector3f pos, tar, Up, right;
 
     // camera speed
     float speed;
@@ -30,7 +38,7 @@ class Camera
 
         // get camera pos
         Vector3f getPos() const;
-
+        Ray generateRay(int, int);
         // print camera details
         void print();
 
