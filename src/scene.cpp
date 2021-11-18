@@ -4,10 +4,10 @@
 Scene::Scene(Camera camera, Vector3f ambientLight):
                     camera(camera),
                     ambientLight(ambientLight){
-	lights.push_back(Light(Vector3f(1, 1, 1), Vector3f(0, 0, 0)));
+	lights.push_back(new Light(Vector3f(1, 1, 1), Vector3f(0, 0, 0)));
 }
 void Scene::addObject(Intersectable*object){
-	objects.pushback(object);
+	objects.push_back(object);
 }
 Hit Scene::intersect(Ray ray) {
 	Hit bestHit;
@@ -17,7 +17,7 @@ Hit Scene::intersect(Ray ray) {
 			bestHit = hit;
 		}
 	}
-	if ((ray.dir).dot(bestHit.normal) > 0){
+	if ((ray.dir).Dot(bestHit.normal) > 0){
 		bestHit.normal = bestHit.normal * (-1);
 	}
 	return bestHit;
@@ -26,13 +26,20 @@ Vector3f Scene::trace(Ray ray, int depth){
 	if(depth > ITERATION_DEPTH){
 		return ambientLight;
 	}
+	Hit hit = intersect(ray);
+	if (hit.t < 0){
+		return ambientLight;
+	} else {
+		return Vector3f(1, 1, 0);
+	}
+
 }
-void Scene::render(std::vector<Vector4f>& image) {
+void Scene::render(std::vector<Vector4f>& image, int height, int width) {
 	for (int Y = 0; Y < height; Y++) {
 		#pragma omp parallel for
 		for (int X = 0; X < width; X++) {
-			Vector3f color = trace(camera.getRay(X, Y));
-			image[Y * windowWidth + X] = Vector4f(color.x, color.y, color.z, 1);
+			Vector3f color = trace(camera.generateRay(X, Y), 0);
+			image[Y * width + X] = Vector4f(color.x, color.y, color.z, 1);
 		}
 	}
 }

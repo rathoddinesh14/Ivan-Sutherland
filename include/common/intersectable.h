@@ -1,6 +1,6 @@
 #ifndef __INTERSECTABLE_H
 #define __INTERSECTABLE_H
-
+#include "include/common/camera.h"
 #pragma once
 enum MaterialType {ROUGH, REFLECTIVE, REFRACTIVE};
 

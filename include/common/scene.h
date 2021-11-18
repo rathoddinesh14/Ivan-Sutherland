@@ -1,6 +1,7 @@
 #ifndef __SCENE_H
 #define __SCENE_H
-
+#include "include/common/math_utils.h"
+#include "include/common/intersectable.h"
 #pragma once
 
 #define ITERATION_DEPTH 5
@@ -22,7 +23,7 @@ class Scene{
 	public:
 		Scene(Camera camera, Vector3f ambientLight);
 		void addObject(Intersectable*object);
-		void render(std::vector<Vector4f>& image);
+		void render(std::vector<Vector4f>& image, int height, int width);
 		Vector3f trace(Ray ray, int depth);
 		Hit intersect(Ray ray);
 };

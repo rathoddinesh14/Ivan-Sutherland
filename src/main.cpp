@@ -13,7 +13,8 @@
 #include "include/common/volumerender.h"
 #include "include/common/arcball.h"
 #include "include/common/ui.h"
-
+#include "include/common/intersectable.h"
+#include "include/common/scene.h"
 using namespace std;
 
 /********************************************************************/
@@ -45,6 +46,7 @@ VolumeRender *volumeRender = 0;
 
 // camera
 Camera camera(theWindowWidth, theWindowHeight);
+Scene scene(camera, Vector3f(0.4, 0.4, 0.4));
 
 /* Constants */
 const int ANIMATION_DELAY = 20; /* milliseconds between rendering */
