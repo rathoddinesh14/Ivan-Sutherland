@@ -1,13 +1,21 @@
-#ifndef __ISOSURFACE_H
-#define __ISOSURFACE_H
+#ifndef __ISOSURFACE_H__
+#define __ISOSURFACE_H__
 
 #pragma once
 class IsoSurface : public Intersectable {
 	Node*root;
+	Vector3f *vertices;
+	int w;
+	int h;
+	float isoValue;
 public:
-	IsoSurface(Node*_root, Material* _material) {
-		root(_root);
-		material(_material);
+	IsoSurface(Node*_root, Vector3f*_vertices, int _w, int _h, float _isoValue, Material* _material) {
+		root = _root;
+		vertices = _vertices;
+		w = _w;
+		h = _h;
+		isoValue = _isoValue;
+		material = _material;
 	}
 	float getA(Node*node,
 			float u0b, float v0b, float w0b,
@@ -22,7 +30,7 @@ public:
 	float getB(Node*node,
 			float u0a, float v0a, float w0a,
 			float u0b, float v0b, float w0b,
-			float u0b, float v0b, float w0b,
+			float u1a, float v1a, float w1a,
 			float u1b, float v1b, float w1b,
 			float iso_000, float iso_001,float iso_010, float iso_011,
 			float iso_100, float iso_101,float iso_110, float iso_111){
@@ -38,7 +46,7 @@ public:
 	float getC(Node*node,
 			float u0a, float v0a, float w0a,
 			float u0b, float v0b, float w0b,
-			float u0b, float v0b, float w0b,
+			float u1a, float v1a, float w1a,
 			float u1b, float v1b, float w1b,
 			float iso_000, float iso_001,float iso_010, float iso_011,
 			float iso_100, float iso_101,float iso_110, float iso_111){
@@ -61,18 +69,41 @@ public:
 				u0a*v1a*w1a*iso_011 + u1a*v0a*w0a*iso_100 + u1a*v0a*w1a*iso_101 +
 				u1a*v1a*w0a*iso_110 + u1a*v1a*w1a*iso_111 - iso;
 	}
-	Hit intersectVoxel(const Ray&ray, Node*node, Vector3f *vertices, int w, int h){
+	Hit intersectVoxel(const Ray&ray, Node*node){
 		Hit hit;
-		float x0, y0, z0;
-		float x1, y1, z1;
 
-		float xa = ray->start.x;
-		float ya = ray->start.y;
-		float za = ray->start.z;
+		/*
+		 * Get isovalue of the eight vertices of the voxel here.
+		 */
+		 int p = w*h;
+		float iso_000 = vertices[2 * node->index + 1].z;
+		float iso_001 = vertices[2 * (node->index + 1) + 1].z;
+		//float iso_101 = vertices[2 * (node->index + p + 1) + 1].z;
+		float iso_010 = vertices[2 * (node->index + p + 1) + 1].z;
+		//float iso_100 = vertices[2 * (node->index + p) + 1].z;
+		float iso_011 = vertices[2 * (node->index + p) + 1].z;
+		//float iso_011 = vertices[2 * (node->index + w) + 1].z;
+		float iso_100 = vertices[2 * (node->index + w) + 1].z;
+		//float iso_010 = vertices[2 * (node->index + w + 1) + 1].z;
+		float iso_101 = vertices[2 * (node->index + w + 1) + 1].z;
+		float iso_110 = vertices[2 * (node->index + p + w + 1) + 1].z;
+		float iso_111 = vertices[2 * (node->index + p + w) + 1].z;
 
-		float xb = ray->dir.x;
-		float yb = ray->dir.y;
-		float zb = ray->dir.z;
+		float x0 = vertices[2 * node->index].x;
+		float y0 = vertices[2 * node->index].y;
+		float z0 = vertices[2 * node->index].z;
+
+		float x1 = vertices[2 * (node->index + p + w + 1)].x;
+		float y1 = vertices[2 * (node->index + p + w + 1)].y;
+		float z1 = vertices[2 * (node->index + p + w + 1)].z;
+
+		float xa = ray.start.x;
+		float ya = ray.start.y;
+		float za = ray.start.z;
+
+		float xb = ray.dir.x;
+		float yb = ray.dir.y;
+		float zb = ray.dir.z;
 
 		float u0a = (x1 - xa)/(x1 - x0);
 		float v0a = (y1 - ya)/(y1 - y0);
@@ -89,24 +120,33 @@ public:
 		float u1b = xb/(x0 - x1);
 		float v1b = yb/(y0 - y1);
 		float w1b = zb/(z0 - z1);
+
 		double*c = (double*)malloc(sizeof(double)*4);
-		/*
-		 * Get isovalue of the eight vertices of the voxel here.
-		 */
-		 int p = w*h;
-		float iso_000 = vertices[2 * node->index + 1].z;
-		float iso_001 = vertices[2 * (node->index + 1) + 1].z;
-		float iso_010 = vertices[2 * (node->index + w + 1) + 1].z;
-		float iso_011 = vertices[2 * (node->index + w) + 1].z;
-		float iso_100 = vertices[2 * (node->index + p) + 1].z;
-		float iso_101 = vertices[2 * (node->index + p + 1) + 1].z;
-		float iso_110 = vertices[2 * (node->index + p + w + 1) + 1].z;
-		float iso_111 = vertices[2 * (node->index + p + w) + 1].z;
 		
-		c[0] = getA();
-		c[1] = getB();
-		c[2] = getC();
-		c[3] = getD();
+		c[0] = getA(node,
+				u0b, v0b, w0b,
+				u1b, v1b, w1b,
+				iso_000, iso_001, iso_010, iso_011,
+				iso_100, iso_101, iso_110, iso_111);
+		c[1] = getB(node,
+				u0a, v0a, w0a,
+				u0b, v0b, w0b,
+				u1a, v1a, w1a,
+				u1b, v1b, w1b,
+				iso_000, iso_001,iso_010, iso_011,
+				iso_100, iso_101,iso_110, iso_111);
+		c[2] = getC(node,
+				u0a, v0a, w0a,
+				u0b, v0b, w0b,
+				u1a, v1a, w1a,
+				u1b, v1b, w1b,
+				iso_000, iso_001,iso_010, iso_011,
+				iso_100, iso_101,iso_110, iso_111);
+		c[3] = getD(node,
+				u0a, v0a, w0a,
+				u1a, v1a, w1a,
+				iso_000, iso_001,iso_010, iso_011,
+				iso_100, iso_101,iso_110, iso_111, isoValue);
 
 		double*s = (double*)malloc(sizeof(double)*3);
 		int num = SolveCubic(c, s);
@@ -143,3 +183,4 @@ public:
 		return hit;
 	}
 };
+#endif // __ISOSURFACE_H__

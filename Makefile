@@ -5,7 +5,7 @@ CFLAGS = -O3 -Wall
 
 INCDIRS = -I. -I./src -I./src/vendor -I./include/vendor -I./src/algorithm -I./include/algorithm
 LIBDIRS = -L.
-LIBS = -lGL -lGLEW -lglut -lm -ldl
+LIBS = -lGL -lGLEW -lglut -lm src/Roots3And4.c -ldl
 
 BIN = sample
 

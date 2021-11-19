@@ -49,6 +49,11 @@ public:
 
     // after getting new iso points from marching cube, update the ibo
     void updateVBO();
+    Node*getNode();
+    Vector3f*getVertices();
+    int getWidth();
+    int getHeight();
+    int getDepth();
 
 };
 

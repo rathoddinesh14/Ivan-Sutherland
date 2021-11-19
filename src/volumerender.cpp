@@ -167,3 +167,18 @@ void VolumeRender::updateVBO()
     glBufferData(GL_ARRAY_BUFFER, isoPoints.size() * sizeof(Vector3f), &isoPoints[0], GL_STATIC_DRAW);
     glBindVertexArray(0);
 }
+Node* VolumeRender::getNode(){
+	return domainSearch->root;
+}
+Vector3f*VolumeRender::getVertices(){
+	return vertices;
+}
+int VolumeRender::getWidth(){
+	return width;
+}
+int VolumeRender::getHeight(){
+	return height;
+}
+int VolumeRender::getDepth(){
+	return depth;
+}

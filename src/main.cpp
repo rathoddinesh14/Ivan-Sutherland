@@ -13,7 +13,9 @@
 #include "include/common/volumerender.h"
 #include "include/common/arcball.h"
 #include "include/common/ui.h"
+#include "include/common/Roots3And4.h"
 #include "include/common/intersectable.h"
+#include "include/common/IsoSurface.h"
 #include "include/common/scene.h"
 #include "include/raytracing/render.h"
 
@@ -50,7 +52,7 @@ VolumeRender *volumeRender = 0;
 // camera
 Camera camera(theWindowWidth, theWindowHeight);
 Scene scene(camera, Vector3f(0.4, 0.4, 0.4));
-
+std::vector<Vector4f> image(theWindowWidth * theWindowHeight);
 /* Constants */
 const int ANIMATION_DELAY = 20; /* milliseconds between rendering */
 char *rawFile = "../../data/tooth_103x94x161_uint8.raw";
@@ -104,7 +106,14 @@ void onInit(int argc, char *argv[])
 	gui->setVolumeRender(volumeRender);
 	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
 	rayTraceRender = new RayTraceRender(theWindowWidth, theWindowHeight);
-	
+
+	Node*grid = volumeRender->getNode();
+	Vector3f*vertices = volumeRender->getVertices();
+	int width = volumeRender->getWidth();
+	int height = volumeRender->getHeight();
+	int depth = volumeRender->getDepth();
+	float isoValue = volumeRender->getIsoValue();
+	scene.addObject(new IsoSurface(grid, vertices, width, height, isoValue, NULL));
 }
 
 static void onDisplay()
@@ -124,8 +133,8 @@ static void onDisplay()
 
 	gui->widget();
 	gui->render();
-
-	// vector<Vector4f> image;
+	image.clear();
+	scene.render(image, theWindowHeight, theWindowWidth);
 	// // loop over window width and height
 	// for (int i = 0; i < theWindowWidth; i++)
 	// {
