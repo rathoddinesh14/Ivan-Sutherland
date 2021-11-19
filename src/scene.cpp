@@ -37,7 +37,9 @@ Vector3f Scene::trace(Ray ray, int depth){
 void Scene::render(std::vector<Vector4f>& image, int height, int width) {
 	for (int Y = 0; Y < height; Y++) {
 		for (int X = 0; X < width; X++) {
-			//Vector3f color = trace(camera.generateRay(X, Y), 0);
+			camera.generateRay(X, Y);
+			printf(".");
+			// Vector3f color = trace(camera.generateRay(X, Y), 0);
 			//image[Y * width + X] = Vector4f(color.x, color.y, color.z, 1);
 		}
 	}

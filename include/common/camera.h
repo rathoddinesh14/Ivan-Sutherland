@@ -6,18 +6,11 @@
 #include "math_utils.h"
 #include <GL/freeglut.h>
 #include "quaternion.h"
-
-struct Ray {
-	Vector3f start, dir;
-	Ray(Vector3f _start, Vector3f _dir) {
-		start = _start;
-		dir = _dir.Normalize();
-	}
-};
+#include "include/raytracing/rayutils.h"
 
 class Camera
 {
-    Vector3f pos, tar, Up, right;
+    Vector3f pos, tar, Up;
 
     // camera speed
     float speed;
@@ -25,6 +18,7 @@ class Camera
     Vector2i mousePos;
     bool onLeftEdge, onRightEdge, onTopEdge, onBottomEdge;
     float angleH, angleV;
+
 
     int width, height;
 
@@ -38,7 +32,9 @@ class Camera
 
         // get camera pos
         Vector3f getPos() const;
+
         Ray generateRay(int, int);
+        
         // print camera details
         void print();
 

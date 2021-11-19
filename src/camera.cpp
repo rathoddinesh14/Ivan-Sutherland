@@ -44,13 +44,8 @@ Camera::Camera(int w, int h):
     onRightEdge     = false;
     mousePos.x      = width / 2;
     mousePos.y      = height / 2;
-
-	float fov = angleV;
-	Vector3f localWidth = pos - tar;
-	float windowSize = localWidth.length() * tanf(fov / 2);
-	right = (Up.Cross(windowSize)).Normalize() * windowSize;
-	// Up = (localWidth.Cross(right)).Normalize()* windowSize;
 }
+
 void Camera::rotate(const Vector3f& axis, float angle)
 {
     Matrix4f rot;
@@ -58,10 +53,16 @@ void Camera::rotate(const Vector3f& axis, float angle)
     Vector4f newUp = rot * Vector4f(Up.x, Up.y, Up.z, 1.0f);
     Up = Vector3f(newUp.x, newUp.y, newUp.z).Normalize();
 }
-Ray Camera::generateRay(int X, int Y) {
-	Vector3f dir = tar + right * (2 * (X + 0.5f) / width - 1) + Up * (2 * (Y + 0.5f) / height - 1) - pos;
-	return Ray(pos, dir);
+
+Ray Camera::generateRay(int X, int Y)
+{
+	Vector3f dir =  tar + 
+                    (Up.Cross(tar).Normalize()) * (2 * (X + 0.5f) / width - 1) 
+                    + Up * (2 * (Y + 0.5f) / height - 1) - pos;
+	
+    return Ray(pos, dir);
 }
+
 Matrix4f Camera::getMatrix()
 {
     // camera transformation
