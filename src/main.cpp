@@ -15,6 +15,8 @@
 #include "include/common/ui.h"
 #include "include/common/intersectable.h"
 #include "include/common/scene.h"
+#include "include/raytracing/render.h"
+
 using namespace std;
 
 /********************************************************************/
@@ -22,6 +24,7 @@ using namespace std;
 
 ui::UI* gui;
 ArcBall *arcball;
+RayTraceRender *rayTraceRender = 0;
 
 char *theProgramTitle = "Volume rendering";
 int theWindowWidth = 700, theWindowHeight = 700;
@@ -100,6 +103,8 @@ void onInit(int argc, char *argv[])
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
 	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
+	rayTraceRender = new RayTraceRender(theWindowWidth, theWindowHeight);
+	
 }
 
 static void onDisplay()
@@ -119,6 +124,21 @@ static void onDisplay()
 
 	gui->widget();
 	gui->render();
+
+	// vector<Vector4f> image;
+	// // loop over window width and height
+	// for (int i = 0; i < theWindowWidth; i++)
+	// {
+	// 	for (int j = 0; j < theWindowHeight; j++)
+	// 	{
+	// 		// random rgb value
+	// 		image.push_back(Vector4f(RandomFloat(), RandomFloat(), RandomFloat(), 1.0f));
+	// 	}
+	// }
+
+	// rayTraceRender->loadTexture(image);
+
+	// rayTraceRender->render();
 
 	// glDisableVertexAttribArray(0);
 
