@@ -3,10 +3,9 @@
 static int MARGIN = 10;
 static float EDGE_STEP = 1.0f;
 
-Camera::Camera(int w, int h):   
-                    pos(0.0f, 1.0f, -2.0f), 
-                    tar(0.0f, 0.0f, 1.0f),
-                    Up(0.0f, 1.0f, 0.0f), speed(0.5f), width(w), height(h)
+Camera::Camera(int w, int h) : pos(0.0f, 0.0f, 4.0f),
+                               tar(0.0f, 0.0f, 1.0f),
+                               Up(0.0f, 1.0f, 0.0f), speed(0.5f), width(w), height(h)
 {
     Vector3f HTarget(tar.x, 0.0, tar.z);
     HTarget.Normalize();
@@ -38,15 +37,17 @@ Camera::Camera(int w, int h):
 
     angleV = -ToDegree(asin(tar.y));
 
-    onTopEdge       = false;
-    onBottomEdge    = false;
-    onLeftEdge      = false;
-    onRightEdge     = false;
-    mousePos.x      = width / 2;
-    mousePos.y      = height / 2;
+    onTopEdge = false;
+    onBottomEdge = false;
+    onLeftEdge = false;
+    onRightEdge = false;
+    mousePos.x = width / 2;
+    mousePos.y = height / 2;
+
+    printf("Camera created\n");
 }
 
-void Camera::rotate(const Vector3f& axis, float angle)
+void Camera::rotate(const Vector3f &axis, float angle)
 {
     Matrix4f rot;
     rot.InitAxisRotateTransform(axis, angle);
@@ -56,10 +57,8 @@ void Camera::rotate(const Vector3f& axis, float angle)
 
 Ray Camera::generateRay(int X, int Y)
 {
-	Vector3f dir =  tar + 
-                    (Up.Cross(tar).Normalize()) * (2 * (X + 0.5f) / width - 1) 
-                    + Up * (2 * (Y + 0.5f) / height - 1) - pos;
-	
+    Vector3f dir = tar +
+                   (Up.Cross(tar).Normalize()) * (2 * (X + 0.5f) / width - 1) + Up * (2 * (Y + 0.5f) / height - 1) - pos;
     return Ray(pos, dir);
 }
 
@@ -103,44 +102,44 @@ void Camera::handleKeyboard(unsigned char key)
 {
     switch (key)
     {
-        case 'w':
-            updatePos(speed*tar.x, speed*tar.y, speed*tar.z);
-            break;
-        case 's':
-            updatePos(-speed*tar.x, -speed*tar.y, -speed*tar.z);
-            break;
-        case 'a':
-        {
-            Vector3f left = tar.Cross(Up).Normalize();
-            updatePos(speed*left.x, speed*left.y, speed*left.z);
-            break;
-        }   
-        case 'd':
-        {
-            Vector3f right = Up.Cross(tar).Normalize();
-            updatePos(speed*right.x, speed*right.y, speed*right.z);
-            break;
-        }
-        case GLUT_KEY_PAGE_UP:
-            updatePos(0.0f, speed, 0.0f);
-            break;
-        case GLUT_KEY_PAGE_DOWN:
-            updatePos(0.0f, -speed, 0.0f);
-            break;
-        case '+':
-            speed += 0.1f;
-            // print speed
-            std::cout << "speed: " << speed << std::endl;
-            break;
-        case '-':
-            speed -= 0.1f;
-            // check if speed is negative
-            if (speed < 0.1f)
-                speed = 0.1f;
-            std::cout << "speed: " << speed << std::endl;
-            break;
-        default:
-            break;
+    case 'w':
+        updatePos(speed * tar.x, speed * tar.y, speed * tar.z);
+        break;
+    case 's':
+        updatePos(-speed * tar.x, -speed * tar.y, -speed * tar.z);
+        break;
+    case 'a':
+    {
+        Vector3f left = tar.Cross(Up).Normalize();
+        updatePos(speed * left.x, speed * left.y, speed * left.z);
+        break;
+    }
+    case 'd':
+    {
+        Vector3f right = Up.Cross(tar).Normalize();
+        updatePos(speed * right.x, speed * right.y, speed * right.z);
+        break;
+    }
+    case GLUT_KEY_PAGE_UP:
+        updatePos(0.0f, speed, 0.0f);
+        break;
+    case GLUT_KEY_PAGE_DOWN:
+        updatePos(0.0f, -speed, 0.0f);
+        break;
+    case '+':
+        speed += 0.1f;
+        // print speed
+        std::cout << "speed: " << speed << std::endl;
+        break;
+    case '-':
+        speed -= 0.1f;
+        // check if speed is negative
+        if (speed < 0.1f)
+            speed = 0.1f;
+        std::cout << "speed: " << speed << std::endl;
+        break;
+    default:
+        break;
     }
 }
 
@@ -148,29 +147,36 @@ void Camera::onRender()
 {
     bool ShouldUpdate = false;
 
-    if (onLeftEdge) {
+    if (onLeftEdge)
+    {
         angleH -= EDGE_STEP;
         ShouldUpdate = true;
     }
-    else if (onRightEdge) {
+    else if (onRightEdge)
+    {
         angleH += EDGE_STEP;
         ShouldUpdate = true;
     }
 
-    if (onTopEdge) {
-        if (angleV > -90.0f) {
+    if (onTopEdge)
+    {
+        if (angleV > -90.0f)
+        {
             angleV -= EDGE_STEP;
             ShouldUpdate = true;
         }
     }
-    else if (onBottomEdge) {
-        if (angleV < 90.0f) {
-           angleV += EDGE_STEP;
-           ShouldUpdate = true;
+    else if (onBottomEdge)
+    {
+        if (angleV < 90.0f)
+        {
+            angleV += EDGE_STEP;
+            ShouldUpdate = true;
         }
     }
 
-    if (ShouldUpdate) {
+    if (ShouldUpdate)
+    {
         update();
     }
 }
@@ -186,28 +192,36 @@ void Camera::handleMouse(int x, int y)
     angleH += (float)DeltaX / 20.0f;
     angleV += (float)DeltaY / 50.0f;
 
-    if (DeltaX == 0) {
-        if (x <= MARGIN) {
+    if (DeltaX == 0)
+    {
+        if (x <= MARGIN)
+        {
             onLeftEdge = true;
         }
-        else if (x >= (width - MARGIN)) {
+        else if (x >= (width - MARGIN))
+        {
             onRightEdge = true;
         }
     }
-    else {
+    else
+    {
         onLeftEdge = false;
         onRightEdge = false;
     }
 
-    if (DeltaY == 0) {
-        if (y <= MARGIN) {
+    if (DeltaY == 0)
+    {
+        if (y <= MARGIN)
+        {
             onTopEdge = true;
         }
-        else if (y >= (height - MARGIN)) {
+        else if (y >= (height - MARGIN))
+        {
             onBottomEdge = true;
         }
     }
-    else {
+    else
+    {
         onTopEdge = false;
         onBottomEdge = false;
     }
@@ -234,4 +248,10 @@ void Camera::update()
 
     Up = tar.Cross(U);
     Up.Normalize();
+}
+
+void Camera::Animate(float dt)
+{
+    Vector3f d = pos - tar;
+    pos = Vector3f(d.x * cos(dt) + d.z * sin(dt), d.y, -d.x * sin(dt) + d.z * cos(dt)) + tar;
 }

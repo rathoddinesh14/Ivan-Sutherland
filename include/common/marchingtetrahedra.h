@@ -11,13 +11,20 @@ namespace marchingtetrahedra
     static std::vector<Vector3f> getIsoPoints(int tetraConfig, std::vector<Vector3f> tetrahedraPoints)
     {
         std::vector<Vector3f> isoPoints;
+        // bool check = true;
 
+        // if (tetraConfig == 6)
         for (int i = 0; tetraTable[tetraConfig][i] != -1; i += 2)
         {
             Vector3f firstVer = tetrahedraPoints[tetraTable[tetraConfig][i]];
             Vector3f secondVer = tetrahedraPoints[tetraTable[tetraConfig][i + 1]];
             Vector3f midPoint = (firstVer + secondVer) * 0.5f;
             isoPoints.push_back(midPoint);
+            // if (check)
+            // {
+            //     check = false;
+            //     printf("tetraConfig: %d\n", tetraConfig);
+            // }
         }
         return isoPoints;
     }

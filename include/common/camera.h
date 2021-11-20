@@ -47,6 +47,9 @@ class Camera
         void onRender();
 
         void update();
+
+        void Animate(float dt);
+
 };
 
 #endif

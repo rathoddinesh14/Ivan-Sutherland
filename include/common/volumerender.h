@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "rawfileparser.h"
 #include "marchingtetrahedra.h"
+#include "lightsource.h"
 #include "domainsearch.h"
 #include "chrono"
 
@@ -25,6 +26,10 @@ class VolumeRender
     int moveY = 0;
     Vector3f *vertices;
     vector<Vector3f> isoPoints;
+    GLuint gAmbientIntensityLoc, glightSrcLoc, gDiffuseIntensityLoc, gSpecLightLoc, gSpecPowerLoc, gWorldTrans, gCamLoc;
+    float ambientLight = 0.3f, diffuseLight = 0.0f, specularLight = 0.5f, shininess = 32.0f;
+    Vector3f cameraPos;
+    LightSource *lightSrc;
     DomainSearch *domainSearch;
     int algo = 0;   // marching tetrahedra is default
 
@@ -35,7 +40,7 @@ public:
     // create ibo for slice
     void createIBO(char axis, int slice);
 
-    void render(Matrix4f VP);
+    void render(Matrix4f VP, Matrix4f Model);
 
     void handleKeyboard(unsigned char key);
 
@@ -55,6 +60,9 @@ public:
     int getHeight();
     int getDepth();
 
+    void setLightSrc(LightSource *lightSrc);
+
+    void setCameraPos(Vector3f cameraPos);
 };
 
 #endif

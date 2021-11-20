@@ -223,6 +223,22 @@ inline Vector3f operator-(const Vector3f& l, const Vector3f& r) {
 	return Ret;
 }
 
+inline Vector3f operator*(const Vector3f& l, const Vector3f& r) {
+	Vector3f Ret(l.x * r.x,
+		l.y * r.y,
+		l.z * r.z);
+
+	return Ret;
+}
+
+inline Vector3f operator/(const Vector3f& l, const Vector3f& r) {
+	Vector3f Ret(l.x / r.x,
+		l.y / r.y,
+		l.z / r.z);
+
+	return Ret;
+}
+
 inline Vector3f operator*(const Vector3f& l, float f) {
 	Vector3f Ret(l.x * f,
 		l.y * f,

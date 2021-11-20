@@ -15,6 +15,30 @@ struct Material {
 	Material(MaterialType t) { type = t; }
 };
 
+struct RoughMaterial : Material {
+	RoughMaterial(Vector3f _kd, Vector3f _ks, float _shininess) : Material(ROUGH) {
+		ka = _kd * M_PI; 
+		kd = _kd;
+		ks = _ks;
+		shininess = _shininess;
+	}
+};
+
+struct ReflectiveMaterial : Material {
+	ReflectiveMaterial(Vector3f n, Vector3f kappa) : Material(REFLECTIVE) {
+		Vector3f one(1, 1, 1);
+		F0 = ((n - one) * (n - one) + kappa * kappa) / ((n + one)*(n + one) + kappa * kappa);
+	}
+};
+
+struct RefractiveMaterial : Material {
+	RefractiveMaterial(Vector3f n) : Material(REFRACTIVE) {
+		Vector3f one(1, 1, 1);
+		F0 = ((n - one)*(n - one)) / ((n + one)*(n + one));
+		ior = n.x;
+	}
+};
+
 /**
  * @brief result of ray and surface intersection
  * 

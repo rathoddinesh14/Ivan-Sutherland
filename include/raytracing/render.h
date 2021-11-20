@@ -5,6 +5,7 @@
 #include <vector>
 #include "include/common/math_utils.h"
 #include "include/common/shader.h"
+#include "scene.h"
 
 /**
  * @brief Ray tracing render class.
