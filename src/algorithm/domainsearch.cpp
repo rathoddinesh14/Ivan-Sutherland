@@ -1,11 +1,12 @@
 #include "include/algorithm/domainsearch.h"
 
-DomainSearch::DomainSearch(int width, int height, int depth, float* data)
+DomainSearch::DomainSearch(int width, int height, int depth, float* data, Vector3f* vertices)
 {
     this->root = NULL;
     cout << "===========================" << endl;
     cout << "Building octree..." << endl;
     root = buildOctree(0, 0, 0, width - 1, height - 1, depth - 1, data, width, height);
+    this->vertices = vertices;
     cout << "Octree built." << endl;
 }
 
@@ -39,6 +40,9 @@ Node* DomainSearch::buildOctree(int x, int y, int z, int ex, int ey, int ez, flo
                                               data[index5], data[index6], data[index7], data[index8]);
         Node *node = new Node(minMax.first, minMax.second);
         node->index = index1;
+        node->gridWidth = w;
+        node->gridHeight = h;
+        node->gridData = vertices;
         node->isLeaf = true;
         return node;
     }

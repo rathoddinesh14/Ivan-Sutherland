@@ -1,10 +1,12 @@
 #ifndef __SCENE_H
 #define __SCENE_H
 
+#include "include/common/volumerender.h"
 #include "include/common/math_utils.h"
-#include "include/common/camera.h"
 #include "rayutils.h"
 #include "include/common/sphere.h"
+#include "raycam.h"
+#include "domainsearch.h"
 
 #pragma once
 
@@ -27,17 +29,29 @@ class Scene
 {
 	std::vector<Intersectable*> objects;
 	std::vector<Light*> lights;
-	Camera* cam;
+	RayCamera *camera;
 	Vector3f ambientLight;
+	VolumeRender *volumeRenderer;
+
+	int width;
+	int height;
+
+	float isoValue;
 
 	public:
-		Scene(Camera *camera, Vector3f ambientLight);
+		Scene(Vector3f ambientLight, int width, int height, VolumeRender *vr);
 		bool shadowIntersect(Ray ray);
 		void addObject(Intersectable*object);
-		void render(std::vector<Vector4f>& image, int height, int width);
+		void render(std::vector<Vector4f>& image);
 		Vector3f trace(Ray ray, int depth);
 		Hit intersect(Ray ray);
 		void Animate(float dt);
+
+		// setters
+		void setIsoValue(float iso);
+
+		// getters
+		float getIsoValue();
 };
 
 #endif

@@ -9,19 +9,19 @@ VolumeRender::VolumeRender(char *rawFile)
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
-    // width = 3;
-    // height = 3;
-    // depth = 3;
-    // minVal = 4;
-    // maxVal = 14;
-    // float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
+    // float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+    width = 3;
+    height = 3;
+    depth = 3;
+    minVal = 4;
+    maxVal = 14;
+    float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
 
-    domainSearch = new DomainSearch(width, height, depth, data);
+    vertices = new Vector3f[2 * depth * width * height];
+    domainSearch = new DomainSearch(width, height, depth, data, vertices);
 
     isoVal = minVal;
     stepSize = (maxVal - minVal) / 100;
-    vertices = new Vector3f[2 * depth * width * height];
     unsigned int *indices = new unsigned int[depth * width * height];
 
     // initialize vertices with unit cube spread over the whole volume
@@ -62,13 +62,13 @@ VolumeRender::VolumeRender(char *rawFile)
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
     gIsoVal = glGetUniformLocation(ShaderProgram, "isoValue");
-	gWorldTrans = glGetUniformLocation(ShaderProgram, "gWorldTrans");
-	gAmbientIntensityLoc = glGetUniformLocation(ShaderProgram, "ambientIntensity");
-	gDiffuseIntensityLoc = glGetUniformLocation(ShaderProgram, "diffuseIntensity");
-	glightSrcLoc = glGetUniformLocation(ShaderProgram, "lightSrc");
-	gSpecLightLoc = glGetUniformLocation(ShaderProgram, "specLight");
-	gSpecPowerLoc = glGetUniformLocation(ShaderProgram, "specPower");
-	gCamLoc = glGetUniformLocation(ShaderProgram, "camPos");
+    gWorldTrans = glGetUniformLocation(ShaderProgram, "gWorldTrans");
+    gAmbientIntensityLoc = glGetUniformLocation(ShaderProgram, "ambientIntensity");
+    gDiffuseIntensityLoc = glGetUniformLocation(ShaderProgram, "diffuseIntensity");
+    glightSrcLoc = glGetUniformLocation(ShaderProgram, "lightSrc");
+    gSpecLightLoc = glGetUniformLocation(ShaderProgram, "specLight");
+    gSpecPowerLoc = glGetUniformLocation(ShaderProgram, "specPower");
+    gCamLoc = glGetUniformLocation(ShaderProgram, "camPos");
 
     updateVBO();
 }
@@ -94,12 +94,12 @@ void VolumeRender::render(Matrix4f VP, Matrix4f Model)
     glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
     glUniform1f(gIsoVal, isoVal);
     glUniform1f(gAmbientIntensityLoc, ambientLight);
-	glUniform1f(gDiffuseIntensityLoc, diffuseLight);
-	glUniform1f(gSpecPowerLoc, shininess);
-	glUniform1f(gSpecLightLoc, specularLight);
+    glUniform1f(gDiffuseIntensityLoc, diffuseLight);
+    glUniform1f(gSpecPowerLoc, shininess);
+    glUniform1f(gSpecLightLoc, specularLight);
     Vector3f ls = lightSrc->getPosition();
-	glUniform3fv(glightSrcLoc, 1, &ls.x);
-	glUniform3fv(gCamLoc, 1, &cameraPos.x);
+    glUniform3fv(glightSrcLoc, 1, &ls.x);
+    glUniform3fv(gCamLoc, 1, &cameraPos.x);
 
     glBindVertexArray(VAO);
     // wire frame
@@ -121,7 +121,7 @@ void VolumeRender::handleKeyboard(unsigned char key)
 {
 }
 
-void VolumeRender::setIsoValue(float val) 
+void VolumeRender::setIsoValue(float val)
 {
     this->isoVal = val;
 }
@@ -167,12 +167,12 @@ void VolumeRender::updateVBO()
         for (int i = 0; i < depth - 1; i++)
         {
             for (int j = 0; j < height - 1; j++)
-            {   
+            {
                 for (int k = 0; k < width - 1; k++)
                 {
                     int index = i * width * height + j * width + k;
                     vector<Vector3f> points = marchingtetrahedra::getIsoPoints(isoVal, index, vertices, width, height);
-                    for (int l = 0; l < points.size(); l+=3)
+                    for (int l = 0; l < points.size(); l += 3)
                     {
                         Vector3f p1 = points[l];
                         Vector3f p2 = points[l + 1];
@@ -219,18 +219,33 @@ void VolumeRender::updateVBO()
     glBufferData(GL_ARRAY_BUFFER, isoPoints.size() * sizeof(Vector3f), &isoPoints[0], GL_STATIC_DRAW);
     glBindVertexArray(0);
 }
-Node* VolumeRender::getNode(){
-	return domainSearch->root;
+
+Node *VolumeRender::getNode()
+{
+    return domainSearch->root;
 }
-Vector3f*VolumeRender::getVertices(){
-	return vertices;
+
+Vector3f *VolumeRender::getVertices()
+{
+    return vertices;
 }
-int VolumeRender::getWidth(){
-	return width;
+
+int VolumeRender::getWidth()
+{
+    return width;
 }
-int VolumeRender::getHeight(){
-	return height;
+
+int VolumeRender::getHeight()
+{
+    return height;
 }
-int VolumeRender::getDepth(){
-	return depth;
+
+int VolumeRender::getDepth()
+{
+    return depth;
+}
+
+DomainSearch* VolumeRender::getDomainSearch()
+{
+    return domainSearch;
 }

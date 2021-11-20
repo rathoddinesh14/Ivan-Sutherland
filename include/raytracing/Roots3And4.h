@@ -1,5 +1,5 @@
 /*
- *  Roots3And4.c
+ *  Roots3And4.h
  *
  *  Utility functions to find cubic and quartic roots,
  *  coefficients are passed like this:
@@ -40,7 +40,7 @@ extern double   sqrt(), cbrt(), cos(), acos();
                           ((x) < 0.0 ? -pow((double)-(x), 1.0/3.0) : 0.0))
 #endif
 
-int SolveQuadric(double c[3], double s[2]){
+static int SolveQuadric(double c[3], double s[2]){
     double p, q, D;
 
     /* normal form: x^2 + px + q = 0 */
@@ -70,7 +70,7 @@ int SolveQuadric(double c[3], double s[2]){
 }
 
 
-int SolveCubic(double c[4], double s[3]){
+static int SolveCubic(double c[4], double s[3]){
     int     i, num;
     double  sub;
     double  A, B, C;
@@ -141,7 +141,7 @@ int SolveCubic(double c[4], double s[3]){
 }
 
 
-int SolveQuartic(double c[5], double s[4]){
+static int SolveQuartic(double c[5], double s[4]){
     double  coeffs[ 4 ];
     double  z, u, v, sub;
     double  A, B, C, D;

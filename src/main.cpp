@@ -98,8 +98,8 @@ void onInit(int argc, char *argv[])
 	/* by default the back ground color is black */
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	camera = new Camera(theWindowWidth, theWindowHeight);
-	// volumeRender = new VolumeRender(rawFile);
+	// camera = new Camera(theWindowWidth, theWindowHeight);
+	volumeRender = new VolumeRender(rawFile);
 	// boundingBox = new BoundingBox();
 	// lightsrc = new LightSource();
 	// lightsrc->setPosition(Vector3f(-0.3f, 1.5f, 0.0f));
@@ -123,8 +123,7 @@ void onInit(int argc, char *argv[])
 	// int height = volumeRender->getHeight();
 	// int depth = volumeRender->getDepth();
 	// float isoValue = volumeRender->getIsoValue();
-	scene = new Scene(camera, Vector3f(0.4, 0.4, 0.4));
-	
+	scene = new Scene(Vector3f(0.4, 0.4, 0.4), theWindowWidth, theWindowHeight, volumeRender);
 }
 
 static void onDisplay()
@@ -133,7 +132,7 @@ static void onDisplay()
 
 	// gui->newFrame();
 
-	camera->onRender();
+	// camera->onRender();
 	// Matrix4f Proj;
 	// Proj.InitPersProjTransform(persProjInfo);
 	// Matrix4f MVP;
@@ -153,7 +152,7 @@ static void onDisplay()
 	// gui->widget();
 	// gui->render();
 	std::vector<Vector4f> image(theWindowWidth * theWindowHeight);
-	scene->render(image, theWindowHeight, theWindowWidth);
+	scene->render(image);
 
 	rayTraceRender->loadTexture(image);
 
@@ -204,7 +203,7 @@ static void onIdle()
 			oldTime = currentTime;
 			/* compute the frame rate */
 			computeFPS();
-			// scene->Animate(0.1f);
+			scene->Animate(0.1f);
 			/* notify window it has to be repainted */
 			glutPostRedisplay();
 		}
@@ -217,7 +216,7 @@ static void onMouseMotion(int x, int y)
 	/* notify window that it has to be re-rendered */
 	// camera.handleMouse(x, y);
 	// ImGui_ImplGLUT_MotionFunc(x, y);
-	arcball->handleCursor(x, y);
+	// arcball->handleCursor(x, y);
 	glutPostRedisplay();
 }
 
@@ -235,7 +234,7 @@ static void onMouseButtonPress(int button, int state, int x, int y)
 	}
 
 	// ImGui_ImplGLUT_MouseFunc(button, state, x, y);
-	arcball->handleMouseButton(button, state, x, y);
+	// arcball->handleMouseButton(button, state, x, y);
 
 	/* notify window that it has to be re-rendered */
 	glutPostRedisplay();
@@ -246,8 +245,8 @@ static void onMouseButtonPress(int button, int state, int x, int y)
 
 static void onAlphaNumericKeyPress(unsigned char key, int x, int y)
 {
-	camera->handleKeyboard(key);
-	volumeRender->handleKeyboard(key);
+	// camera->handleKeyboard(key);
+	// volumeRender->handleKeyboard(key);
 
 	switch (key)
 	{
@@ -272,8 +271,8 @@ static void onAlphaNumericKeyPress(unsigned char key, int x, int y)
    post: scene is updated and re-rendered */
 static void onSpecialKeyPress(int key, int x, int y)
 {
-	camera->handleKeyboard(key);
-	volumeRender->handleKeyboard(key);
+	// camera->handleKeyboard(key);
+	// volumeRender->handleKeyboard(key);
 
 	/* please do not change function of these keys */
 	switch (key)
@@ -287,12 +286,12 @@ static void onSpecialKeyPress(int key, int x, int y)
 			theWindowPositionY = glutGet((GLenum)(GLUT_WINDOW_Y));
 			glutFullScreen();
 			glViewport(0, 0, 1920, 1080);
-			arcball->updateWindowSize(1920, 1080);
+			// arcball->updateWindowSize(1920, 1080);
 		}
 		else
 		{
 			glViewport(0, 0, theWindowWidth, theWindowHeight);
-			arcball->updateWindowSize(theWindowWidth, theWindowHeight);
+			// arcball->updateWindowSize(theWindowWidth, theWindowHeight);
 			glutPositionWindow(theWindowPositionX, theWindowPositionY);
 		}
 		break;

@@ -1,11 +1,24 @@
 #include "include/raytracing/scene.h"
 
-Scene::Scene(Camera *camera, Vector3f ambientLight) : cam(camera),
-													  ambientLight(ambientLight)
+Scene::Scene(Vector3f ambientLight, int width, int height, VolumeRender *vr) : 
+camera(camera), ambientLight(ambientLight), width(width), height(height), volumeRenderer(vr)
 {
+	camera = new RayCamera();
+	Vector3f eye = Vector3f(0, 0, 4), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
+	float fov = 45 * M_PI / 180;
+	camera->set(eye, lookat, vup, fov, width, height);
+
 	lights.push_back(new Light(Vector3f(1, 1, 1), ambientLight));
 
 	Vector3f ks(2, 2, 2);
+
+	isoValue = 6;
+
+	for (auto node : volumeRenderer->getDomainSearch()->getNodes(isoValue))
+	{
+		objects.push_back(node);
+	}
+	printf("%d nodes\n", objects.size());
 
 	objects.push_back(new Sphere(Vector3f(-0.55, 0, 0), 0.5,
 								 new RoughMaterial(Vector3f(0.3, 0.2, 0.1), ks, 50)));
@@ -16,7 +29,7 @@ Scene::Scene(Camera *camera, Vector3f ambientLight) : cam(camera),
 	// objects.push_back(new Sphere(Vector3f(0, 0.3, 0.6), 0.5,
 	// 							 new RefractiveMaterial(Vector3f(1.2, 1.2, 1.2))));
 	// objects.push_back(new Sphere(Vector3f(0, -6.5, 0), 6,
-	// 							 new ReflectiveMaterial(Vector3f(0.14, 0.16, 0.13), Vector3f(4.1, 2.3, 3.1))));
+	//  new ReflectiveMaterial(Vector3f(0.14, 0.16, 0.13), Vector3f(4.1, 2.3, 3.1))));
 	printf("Scene created\n");
 }
 
@@ -98,13 +111,13 @@ Vector3f Scene::trace(Ray ray, int depth = 0)
 	return outRadiance;
 }
 
-void Scene::render(std::vector<Vector4f> &image, int height, int width)
+void Scene::render(std::vector<Vector4f> &image)
 {
 	for (int Y = 0; Y < height; Y++)
 	{
 		for (int X = 0; X < width; X++)
 		{
-			Vector3f color = trace(cam->generateRay(X, Y));
+			Vector3f color = trace(camera->getRay(X, Y));
 			image[Y * width + X] = Vector4f(color.x, color.y, color.z, 1);
 		}
 	}
@@ -112,5 +125,15 @@ void Scene::render(std::vector<Vector4f> &image, int height, int width)
 
 void Scene::Animate(float dt)
 {
-	cam->Animate(dt);
+	camera->Animate(dt);
+}
+
+void Scene::setIsoValue(float iso)
+{
+	isoValue = iso;
+}
+
+float Scene::getIsoValue()
+{
+	return isoValue;
 }

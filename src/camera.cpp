@@ -55,13 +55,6 @@ void Camera::rotate(const Vector3f &axis, float angle)
     Up = Vector3f(newUp.x, newUp.y, newUp.z).Normalize();
 }
 
-Ray Camera::generateRay(int X, int Y)
-{
-    Vector3f dir = tar +
-                   (Up.Cross(tar).Normalize()) * (2 * (X + 0.5f) / width - 1) + Up * (2 * (Y + 0.5f) / height - 1) - pos;
-    return Ray(pos, dir);
-}
-
 Matrix4f Camera::getMatrix()
 {
     // camera transformation
@@ -248,10 +241,4 @@ void Camera::update()
 
     Up = tar.Cross(U);
     Up.Normalize();
-}
-
-void Camera::Animate(float dt)
-{
-    Vector3f d = pos - tar;
-    pos = Vector3f(d.x * cos(dt) + d.z * sin(dt), d.y, -d.x * sin(dt) + d.z * cos(dt)) + tar;
 }

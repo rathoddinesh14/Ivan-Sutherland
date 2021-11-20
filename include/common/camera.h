@@ -6,7 +6,6 @@
 #include "math_utils.h"
 #include <GL/freeglut.h>
 #include "quaternion.h"
-#include "include/raytracing/rayutils.h"
 
 class Camera
 {
@@ -32,8 +31,6 @@ class Camera
 
         // get camera pos
         Vector3f getPos() const;
-
-        Ray generateRay(int, int);
         
         // print camera details
         void print();
@@ -47,9 +44,6 @@ class Camera
         void onRender();
 
         void update();
-
-        void Animate(float dt);
-
 };
 
 #endif

@@ -13,8 +13,9 @@ class DomainSearch
 {
 public:
     Node *root;
+    Vector3f *vertices;
 
-    DomainSearch(int width, int height, int depth, float *data);
+    DomainSearch(int width, int height, int depth, float *data, Vector3f *vertices);
     ~DomainSearch();
 
     /**
