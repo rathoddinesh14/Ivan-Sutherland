@@ -4,7 +4,7 @@ Scene::Scene(Vector3f ambientLight, int width, int height, VolumeRender *vr) :
 camera(camera), ambientLight(ambientLight), width(width), height(height), volumeRenderer(vr)
 {
 	camera = new RayCamera();
-	Vector3f eye = Vector3f(0, 0, 50), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
+	Vector3f eye = Vector3f(0, 0, 20), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
 	float fov = 45 * M_PI / 180;
 	camera->set(eye, lookat, vup, fov, width, height);
 
