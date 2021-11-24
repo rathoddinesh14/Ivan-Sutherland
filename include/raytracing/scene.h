@@ -10,7 +10,7 @@
 
 #pragma once
 
-#define ITERATION_DEPTH 5
+#define ITERATION_DEPTH 1
 
 const float epsilon = 0.0001f;
 

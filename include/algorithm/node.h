@@ -18,6 +18,7 @@ public:
     std::vector<Node *> child;
     bool isLeaf;
     int index;
+    float isoValue;
 
     Node(float min, float max);
 

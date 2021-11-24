@@ -4,7 +4,7 @@ Scene::Scene(Vector3f ambientLight, int width, int height, VolumeRender *vr) :
 camera(camera), ambientLight(ambientLight), width(width), height(height), volumeRenderer(vr)
 {
 	camera = new RayCamera();
-	Vector3f eye = Vector3f(0, 0, 4), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
+	Vector3f eye = Vector3f(0, 0, 100), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
 	float fov = 45 * M_PI / 180;
 	camera->set(eye, lookat, vup, fov, width, height);
 
@@ -16,6 +16,7 @@ camera(camera), ambientLight(ambientLight), width(width), height(height), volume
 
 	for (auto node : volumeRenderer->getDomainSearch()->getNodes(isoValue))
 	{
+		node->isoValue = isoValue;
 		objects.push_back(node);
 	}
 	printf("%d nodes\n", objects.size());
@@ -68,6 +69,8 @@ Vector3f Scene::trace(Ray ray, int depth = 0)
 
 	Hit hit = intersect(ray);
 
+	printf("%f\n", hit.t);
+
 	if (hit.t < 0)
 	{
 		return ambientLight;
@@ -119,7 +122,9 @@ void Scene::render(std::vector<Vector4f> &image)
 		{
 			Vector3f color = trace(camera->getRay(X, Y));
 			image[Y * width + X] = Vector4f(color.x, color.y, color.z, 1);
+			// printf("%d %d\n", X, Y);
 		}
+		printf("\rRendering %d%%", 100 * Y / height);
 	}
 }
 

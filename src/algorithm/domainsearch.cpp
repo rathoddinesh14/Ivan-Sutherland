@@ -5,8 +5,8 @@ DomainSearch::DomainSearch(int width, int height, int depth, float* data, Vector
     this->root = NULL;
     cout << "===========================" << endl;
     cout << "Building octree..." << endl;
-    root = buildOctree(0, 0, 0, width - 1, height - 1, depth - 1, data, width, height);
     this->vertices = vertices;
+    root = buildOctree(0, 0, 0, width - 1, height - 1, depth - 1, data, width, height);
     cout << "Octree built." << endl;
 }
 

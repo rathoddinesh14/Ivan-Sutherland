@@ -36,7 +36,7 @@ VolumeRender::VolumeRender(char *rawFile)
                 float y = (float)j / (height - 1);
                 float z = (float)(depth - 1 - i) / (depth - 1);
                 int index = i * width * height + j * width + k;
-                vertices[2 * index] = Vector3f(x, z, y);
+                vertices[2 * index] = Vector3f(x-0.5, z-0.5, y-0.5);
                 vertices[2 * index + 1] = Vector3f(data[index]);
                 indices[index] = 2 * index;
             }

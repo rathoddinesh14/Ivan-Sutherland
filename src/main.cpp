@@ -123,7 +123,7 @@ void onInit(int argc, char *argv[])
 	// int height = volumeRender->getHeight();
 	// int depth = volumeRender->getDepth();
 	// float isoValue = volumeRender->getIsoValue();
-	scene = new Scene(Vector3f(0.4, 0.4, 0.4), theWindowWidth, theWindowHeight, volumeRender);
+	scene = new Scene(Vector3f(0.1, 0.1, 0.1), theWindowWidth, theWindowHeight, volumeRender);
 }
 
 static void onDisplay()
@@ -153,9 +153,7 @@ static void onDisplay()
 	// gui->render();
 	std::vector<Vector4f> image(theWindowWidth * theWindowHeight);
 	scene->render(image);
-
 	rayTraceRender->loadTexture(image);
-
 	rayTraceRender->render();
 
 	// glDisableVertexAttribArray(0);
@@ -203,7 +201,7 @@ static void onIdle()
 			oldTime = currentTime;
 			/* compute the frame rate */
 			computeFPS();
-			scene->Animate(0.1f);
+			// scene->Animate(0.1f);
 			/* notify window it has to be repainted */
 			glutPostRedisplay();
 		}
