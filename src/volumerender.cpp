@@ -18,9 +18,8 @@ VolumeRender::VolumeRender(char *rawFile)
     float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
 
     vertices = new Vector3f[2 * depth * width * height];
-    domainSearch = new DomainSearch(width, height, depth, data, vertices);
 
-    isoVal = minVal;
+     isoVal = minVal;
     stepSize = (maxVal - minVal) / 100;
     unsigned int *indices = new unsigned int[depth * width * height];
 
@@ -42,6 +41,8 @@ VolumeRender::VolumeRender(char *rawFile)
             }
         }
     }
+
+    domainSearch = new DomainSearch(width, height, depth, data, vertices);
 
     // create the vertex buffer object
     glBufferData(GL_ARRAY_BUFFER, isoPoints.size() * sizeof(Vector3f), &isoPoints[0], GL_STATIC_DRAW);
