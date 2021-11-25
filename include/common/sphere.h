@@ -19,6 +19,7 @@ public:
 		float b = dist.Dot(ray.dir) * 2.0f;
 		float c = dist.Dot(dist) - radius * radius;
 		float discr = b * b - 4.0f * a * c;
+
 		if (discr < 0) return hit;
 		float sqrt_discr = sqrtf(discr);
 		float t1 = (-b + sqrt_discr) / 2.0f / a;	// t1 >= t2 for sure

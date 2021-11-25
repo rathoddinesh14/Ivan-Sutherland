@@ -25,6 +25,7 @@
  */
 
 #include    <math.h>
+#include "include/common/math_utils.h"
 #ifndef M_PI
 #define M_PI          3.14159265358979323846
 #endif
@@ -40,33 +41,61 @@ extern double   sqrt(), cbrt(), cos(), acos();
                           ((x) < 0.0 ? -pow((double)-(x), 1.0/3.0) : 0.0))
 #endif
 
-static int SolveQuadric(double c[3], double s[2]){
-    double p, q, D;
+/**
+ * @brief Get the Plane equation
+ * c[3] - x, c[2] - y, c[1] - z, c[0] - d
+ * @param c - coefficients of the equation
+ * @param pt - point on the plane
+ * @param DC - Direction cosines
+ * @return void
+ */
+static void GetPlane(double c[4], Vector3f pt, Vector3f DC)
+{
+    c[3] = DC.x;
+    c[2] = DC.y;
+    c[1] = DC.z;
+    c[0] = -(DC.x * pt.x + DC.y * pt.y + DC.z * pt.z);
+}
 
-    /* normal form: x^2 + px + q = 0 */
+/**
+ * @brief function to check if a point is inside the triangle
+ * 
+ * @param A, B, C - vertices of the triangle, P - point to be checked
+ * @return bool - true if the point is inside the triangle
+ */
+static bool IsInsideTriangle(Vector3f A, Vector3f B, Vector3f C, Vector3f P)
+{
+    A = A - P;
+    B = B - P;
+    C = C - P;
 
-    p = c[ 1 ] / (2 * c[ 2 ]);
-    q = c[ 0 ] / c[ 2 ];
+    // u - PBC, v - PCA, w - PAB
 
-    D = p * p - q;
+    Vector3f u = B.Cross(C);
+    Vector3f v = C.Cross(A);
+    Vector3f w = A.Cross(B);
 
-    if (IsZero(D))
-    {
-	s[ 0 ] = - p;
-	return 1;
-    }
-    else if (D < 0)
-    {
-	return 0;
-    }
-    else if (D > 0)
-    {
-	double sqrt_D = sqrt(D);
+    if (u.Dot(v) < 0.0)
+        return false;
+    if (u.Dot(w) < 0.0)
+        return false;
+    
+    // all normals point in the same direction
+    return true;
+}
 
-	s[ 0 ] =   sqrt_D - p;
-	s[ 1 ] = - sqrt_D - p;
-	return 2;
-    }
+/**
+ * @brief isovalue of a point using bilinear interpolation
+ * 
+ * @param A, B, C, D - vertices of the polygon, P - point to be checked
+ * @param AVal, BVal, CVal, DVal - values of the vertices
+ * @return float - isovalue of the point
+ */
+static float GetIsoValue(Vector3f A, Vector3f B, Vector3f C, Vector3f D, float AVal, float BVal, float CVal, float DVal, Vector3f P)
+{
+    float R1 = ((B.x - P.x) / (B.x - A.x)) * AVal + ((P.x - A.x) / (B.x - A.x)) * BVal;
+    float R2 = ((C.x - P.x) / (C.x - D.x)) * DVal + ((P.x - D.x) / (C.x - D.x)) * CVal;
+    return ((P.y - B.y)/(C.y - B.y)) * R2 + ((C.y - P.y)/(C.y - B.y)) * R1;
 }
 
 
@@ -140,96 +169,31 @@ static int SolveCubic(double c[4], double s[3]){
     return num;
 }
 
+static int SolveQuadric(double c[3], double s[2]){
+    double p, q, D;
 
-static int SolveQuartic(double c[5], double s[4]){
-    double  coeffs[ 4 ];
-    double  z, u, v, sub;
-    double  A, B, C, D;
-    double  sq_A, p, q, r;
-    int     i, num;
+    /* normal form: x^2 + px + q = 0 */
 
-    /* normal form: x^4 + Ax^3 + Bx^2 + Cx + D = 0 */
+    p = c[ 1 ] / (2 * c[ 2 ]);
+    q = c[ 0 ] / c[ 2 ];
 
-    A = c[ 3 ] / c[ 4 ];
-    B = c[ 2 ] / c[ 4 ];
-    C = c[ 1 ] / c[ 4 ];
-    D = c[ 0 ] / c[ 4 ];
+    D = p * p - q;
 
-    /*  substitute x = y - A/4 to eliminate cubic term:
-	x^4 + px^2 + qx + r = 0 */
-
-    sq_A = A * A;
-    p = - 3.0/8 * sq_A + B;
-    q = 1.0/8 * sq_A * A - 1.0/2 * A * B + C;
-    r = - 3.0/256*sq_A*sq_A + 1.0/16*sq_A*B - 1.0/4*A*C + D;
-
-    if (IsZero(r))
+    if (IsZero(D))
     {
-	/* no absolute term: y(y^3 + py + q) = 0 */
-
-	coeffs[ 0 ] = q;
-	coeffs[ 1 ] = p;
-	coeffs[ 2 ] = 0;
-	coeffs[ 3 ] = 1;
-
-	num = SolveCubic(coeffs, s);
-
-	s[ num++ ] = 0;
+	s[ 0 ] = - p;
+	return 1;
     }
-    else
+    else if (D < 0)
     {
-	/* solve the resolvent cubic ... */
-
-	coeffs[ 0 ] = 1.0/2 * r * p - 1.0/8 * q * q;
-	coeffs[ 1 ] = - r;
-	coeffs[ 2 ] = - 1.0/2 * p;
-	coeffs[ 3 ] = 1;
-
-	(void) SolveCubic(coeffs, s);
-
-	/* ... and take the one real solution ... */
-
-	z = s[ 0 ];
-
-	/* ... to build two quadric equations */
-
-	u = z * z - r;
-	v = 2 * z - p;
-
-	if (IsZero(u))
-	    u = 0;
-	else if (u > 0)
-	    u = sqrt(u);
-	else
-	    return 0;
-
-	if (IsZero(v))
-	    v = 0;
-	else if (v > 0)
-	    v = sqrt(v);
-	else
-	    return 0;
-
-	coeffs[ 0 ] = z - u;
-	coeffs[ 1 ] = q < 0 ? -v : v;
-	coeffs[ 2 ] = 1;
-
-	num = SolveQuadric(coeffs, s);
-
-	coeffs[ 0 ]= z + u;
-	coeffs[ 1 ] = q < 0 ? v : -v;
-	coeffs[ 2 ] = 1;
-
-	num += SolveQuadric(coeffs, s + num);
+	return 0;
     }
+    else if (D > 0)
+    {
+	double sqrt_D = sqrt(D);
 
-    /* resubstitute */
-
-    sub = 1.0/4 * A;
-
-    for (i = 0; i < num; ++i)
-	s[ i ] -= sub;
-
-    return num;
+	s[ 0 ] =   sqrt_D - p;
+	s[ 1 ] = - sqrt_D - p;
+	return 2;
+    }
 }
-

@@ -29,7 +29,7 @@ RayTraceRender *rayTraceRender = 0;
 Scene *scene = 0;
 
 char *theProgramTitle = "Volume rendering";
-int theWindowWidth = 1, theWindowHeight = 1;
+int theWindowWidth = 700, theWindowHeight = 700;
 int theWindowPositionX = 40, theWindowPositionY = 40;
 bool isFullScreen = false;
 bool isAnimating = true;

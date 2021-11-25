@@ -4,7 +4,7 @@ Scene::Scene(Vector3f ambientLight, int width, int height, VolumeRender *vr) :
 camera(camera), ambientLight(ambientLight), width(width), height(height), volumeRenderer(vr)
 {
 	camera = new RayCamera();
-	Vector3f eye = Vector3f(0, 0, 20), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
+	Vector3f eye = Vector3f(0, 0, 5), vup = Vector3f(0, 1, 0), lookat = Vector3f(0, 0, 0);
 	float fov = 45 * M_PI / 180;
 	camera->set(eye, lookat, vup, fov, width, height);
 
@@ -12,7 +12,7 @@ camera(camera), ambientLight(ambientLight), width(width), height(height), volume
 
 	Vector3f ks(2, 2, 2);
 
-	isoValue = 6;
+	isoValue = 10;
 
 	for (auto node : volumeRenderer->getDomainSearch()->getNodes(isoValue))
 	{
@@ -21,8 +21,8 @@ camera(camera), ambientLight(ambientLight), width(width), height(height), volume
 	}
 	printf("%d nodes\n", objects.size());
 
-	objects.push_back(new Sphere(Vector3f(-0.55, 0, 0), 0.5,
-								 new RoughMaterial(Vector3f(0.3, 0.2, 0.1), ks, 50)));
+	// objects.push_back(new Sphere(Vector3f(-0.55, 0, 0), 0.5,
+	// 							 new RoughMaterial(Vector3f(0.3, 0.2, 0.1), ks, 50)));
 	// objects.push_back(new Sphere(Vector3f(0.55, 0, 0), 0.5,
 	// 							 new RoughMaterial(Vector3f(0.1, 0.2, 0.3), ks, 100)));
 	// objects.push_back(new Sphere(Vector3f(0, 0.5, -0.8), 0.5,
@@ -40,6 +40,11 @@ Hit Scene::intersect(Ray ray)
 	for (Intersectable *object : objects)
 	{
 		Hit hit = object->intersect(ray); //  hit.t < 0 if no intersection
+		// if (hit.t != -1)
+		// {
+		// 	printf("hit.t = %f\n", hit.t);
+		// 	printf("Hit position = %f, %f, %f\n", hit.position.x, hit.position.y, hit.position.z);
+		// }
 		if (hit.t > 0 && (bestHit.t < 0 || hit.t < bestHit.t))
 		{
 			bestHit = hit;
@@ -67,14 +72,15 @@ Vector3f Scene::trace(Ray ray, int depth = 0)
 		return ambientLight;
 	}
 
-	printf("======================================\n");
-	ray.start.Print();
-	ray.dir.Print();
+	// printf("======================================\n");
+	// ray.start.Print();
+	// ray.dir.Print();
+	// printf("\n");
 
 	Hit hit = intersect(ray);
 
-	printf("%f\n", hit.t);
-	printf("======================================\n");
+	// printf("%f\n", hit.t);
+	// printf("======================================\n");
 
 	if (hit.t < 0)
 	{
@@ -125,12 +131,12 @@ void Scene::render(std::vector<Vector4f> &image)
 	{
 		for (int X = 0; X < width; X++)
 		{
-			printf("%d %d\n", X, Y);
+			// printf("%d %d\n", X, Y);
 			Vector3f color = trace(camera->getRay(X, Y));
 			image[Y * width + X] = Vector4f(color.x, color.y, color.z, 1);
 			// printf("%d %d\n", X, Y);
 		}
-		// printf("\rRendering %d%%", 100 * Y / height);
+		printf("\rRendering %d%%", 100 * Y / height);
 	}
 }
 

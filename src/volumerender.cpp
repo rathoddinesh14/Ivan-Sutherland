@@ -9,13 +9,13 @@ VolumeRender::VolumeRender(char *rawFile)
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
-    width = 3;
-    height = 3;
-    depth = 3;
-    minVal = 4;
-    maxVal = 14;
-    float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
+    float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+    // width = 3;
+    // height = 3;
+    // depth = 3;
+    // minVal = 4;
+    // maxVal = 14;
+    // float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
 
     vertices = new Vector3f[2 * depth * width * height];
 
@@ -32,7 +32,7 @@ VolumeRender::VolumeRender(char *rawFile)
             {
                 // normalise the coordinates to fit in the unit cube
                 float x = (float)k / (width - 1);
-                float y = (float)j / (height - 1);
+                float y = (float)(height - 1 - j) / (height - 1);
                 float z = (float)(depth - 1 - i) / (depth - 1);
                 int index = i * width * height + j * width + k;
                 vertices[2 * index] = Vector3f(x-0.5, z-0.5, y-0.5);
@@ -58,7 +58,7 @@ VolumeRender::VolumeRender(char *rawFile)
     glBindVertexArray(0);
 
     // clear the data
-    // delete[] data;
+    delete[] data;
 
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");

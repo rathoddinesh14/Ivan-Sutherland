@@ -22,172 +22,193 @@ void Node::operator+=(Node *other)
     }
 }
 
+
+static float Iso_0 = 0, Iso_1 = 0, Iso_2 = 0, Iso_3 = 0;
+static float Iso_4 = 0, Iso_5 = 0, Iso_6 = 0, Iso_7 = 0;
+static float A1 = 0, B1 = 0, C1 = 0, D1 = 0;
+static float E1 = 0, F1 = 0, G1 = 0, H1 = 0;
+
+static Vector3f p0, p1, p2, p4, intersectP;
+double plane[4];
+double M[4], S[3];
+static int numSols = 0;
+static double closestIntersection = -1;
+
 Hit Node::intersect(const Ray &ray)
 {
-    // printf("Node::intersect()\n");
-
+    // printf("---------------------------------------\n");
     Hit hit;
 
     // isovalues of voxel
     int p = gridWidth * gridHeight;
-    float iso_000 = gridData[2 * (this->index + p + gridWidth + 1) + 1].z;
-    float iso_001 = gridData[2 * (this->index + gridWidth + 1) + 1].z;
-    float iso_010 = gridData[2 * (this->index + p + 1) + 1].z;
-    float iso_011 = gridData[2 * (this->index + 1) + 1].z;
-    float iso_100 = gridData[2 * (this->index + p + gridWidth) + 1].z;
-    float iso_101 = gridData[2 * (this->index + gridWidth) + 1].z;
-    float iso_110 = gridData[2 * (this->index + p) + 1].z;
-    float iso_111 = gridData[2 * (this->index) + 1].z;
 
-    printf("\niso_000: %f\n", iso_000);
-    printf("iso_001: %f\n", iso_001);
-    printf("iso_010: %f\n", iso_010);
-    printf("iso_011: %f\n", iso_011);
-    printf("iso_100: %f\n", iso_100);
-    printf("iso_101: %f\n", iso_101);
-    printf("iso_110: %f\n", iso_110);
-    printf("iso_111: %f\n", iso_111);
+    Iso_0 = gridData[2 * (this->index + p) + 1].z;
+    Iso_1 = gridData[2 * (this->index + p + 1) + 1].z;
+    Iso_2 = gridData[2 * (this->index) + 1].z;
+    Iso_3 = gridData[2 * (this->index + p + gridWidth) + 1].z;
+    Iso_4 = gridData[2 * (this->index + 1) + 1].z;
+    Iso_5 = gridData[2 * (this->index + gridWidth) + 1].z;
+    Iso_6 = gridData[2 * (this->index + p + gridWidth + 1) + 1].z;
+    Iso_7 = gridData[2 * (this->index + gridWidth + 1) + 1].z;
 
-    // x0, yo, z0 and x1, y1, z1
-    float x0 = gridData[2 * (this->index + p + gridWidth + 1)].x;
-    float y0 = gridData[2 * (this->index + p + gridWidth + 1)].y;
-    float z0 = gridData[2 * (this->index + p + gridWidth + 1)].z;
-    float x1 = gridData[2 * (this->index)].x;
-    float y1 = gridData[2 * (this->index)].y;
-    float z1 = gridData[2 * (this->index)].z;
+    // printf("Iso_0: %f\n", Iso_0);
+    // gridData[2 * (this->index + p)].Print();
+    // printf("\n");
+    // printf("Iso_1: %f\n", Iso_1);
+    // gridData[2 * (this->index + p + 1)].Print();
+    // printf("\n");
+    // printf("Iso_2: %f\n", Iso_2);
+    // gridData[2 * (this->index)].Print();
+    // printf("\n");
+    // printf("Iso_3: %f\n", Iso_3);
+    // gridData[2 * (this->index + p + gridWidth)].Print();
+    // printf("\n");
+    // printf("Iso_4: %f\n", Iso_4);
+    // gridData[2 * (this->index + 1)].Print();
+    // printf("\n");
+    // printf("Iso_5: %f\n", Iso_5);
+    // gridData[2 * (this->index + gridWidth)].Print();
+    // printf("\n");
+    // printf("Iso_6: %f\n", Iso_6);
+    // gridData[2 * (this->index + p + gridWidth + 1)].Print();
+    // printf("\n");
+    // printf("Iso_7: %f\n", Iso_7);
+    // gridData[2 * (this->index + gridWidth + 1)].Print();
+    // printf("\n");
 
-    // printf("index %d\n", this->index);
+    // print index
+    // printf("index: %d\n", this->index);
 
-    printf("x0: %f, y0: %f, z0: %f\n", x0, y0, z0);
-    printf("x1: %f, y1: %f, z1: %f\n", x1, y1, z1);
+    // Vector p0, p7
+    p0 = gridData[2 * (this->index + p)];
+    p1 = gridData[2 * (this->index + p + 1)];
+    p2 = gridData[2 * (this->index)];
+    p4 = gridData[2 * (this->index + 1)];
 
-    // xa + t * xb
-    float xa = ray.start.x;
-    float xb = ray.dir.x;
+    // printf("p0: %f %f %f\n", p0.x, p0.y, p0.z);
+    
+    // plane equation
+    GetPlane(plane, p0, Vector3f(0.0f, 0.0f, 1.0f));
 
-    // ya + t * yb
-    float ya = ray.start.y;
-    float yb = ray.dir.y;
+    // printf("plane: %f %f %f %f\n", plane[0], plane[1], plane[2], plane[3]);
 
-    // za + t * zb
-    float za = ray.start.z;
-    float zb = ray.dir.z;
 
-    // p = a + t * b
-    float u0a = (x1 - xa) / (x1 - x0);
-    float v0a = (y1 - ya) / (y1 - y0);
-    float w0a = (z1 - za) / (z1 - z0);
+    // finding intersection
+    float t = - (plane[3] * ray.start.x + plane[2] * ray.start.y + plane[1] * ray.start.z + plane[0]) /
+                     (plane[3] * ray.dir.x + plane[2] * ray.dir.y + plane[1] * ray.dir.z);
 
-    float u0b = xb / (x1 - x0);
-    float v0b = yb / (y1 - y0);
-    float w0b = zb / (z1 - z0);
-
-    float u1a = 1 - u0a;
-    float v1a = 1 - v0a;
-    float w1a = 1 - w0a;
-
-    float u1b = 1 - u0b;
-    float v1b = 1 - v0b;
-    float w1b = 1 - w0b;
-
-    // At^3 + Bt^2 + Ct + D = 0
-    double *C = new double[4];
-
-    C[3] = u0b * v0b * w0b * iso_000 
-         + u0b * v0b * w1b * iso_001 
-         + u0b * v1b * w0b * iso_010
-         + u0b * v1b * w1b * iso_011 
-         + u1b * v0b * w0b * iso_100 
-         + u1b * v0b * w1b * iso_101 
-         + u1b * v1b * w0b * iso_110 
-         + u1b * v1b * w1b * iso_111;
-
-    C[2] = (u0a * v0b * w0b + u0b * v0a * w0b + u0b * v0b * w0a) * iso_000 +
-           (u0a * v0b * w1b + u0b * v0a * w1b + u0b * v0b * w1a) * iso_001 +
-           (u0a * v1b * w0b + u0b * v1a * w0b + u0b * v1b * w0a) * iso_010 +
-           (u0a * v1b * w1b + u0b * v1a * w1b + u0b * v1b * w1a) * iso_011 +
-           (u1a * v0b * w0b + u1b * v0a * w0b + u1b * v0b * w0a) * iso_100 +
-           (u1a * v0b * w1b + u1b * v0a * w1b + u1b * v0b * w1a) * iso_101 +
-           (u1a * v1b * w0b + u1b * v1a * w0b + u1b * v1b * w0a) * iso_110 +
-           (u1a * v1b * w1b + u1b * v1a * w1b + u1b * v1b * w1a) * iso_111;
-
-    C[1] = (u0b * v0a * w0a + u0a * v0b * w0a + u0a * v0a * w0b) * iso_000 +
-           (u0b * v0a * w1a + u0a * v0b * w1a + u0a * v0a * w1b) * iso_001 +
-           (u0b * v1a * w0a + u0a * v1b * w0a + u0a * v1a * w0b) * iso_010 +
-           (u0b * v1a * w1a + u0a * v1b * w1a + u0a * v1a * w1b) * iso_011 +
-           (u1b * v0a * w0a + u1a * v0b * w0a + u1a * v0a * w0b) * iso_100 +
-           (u1b * v0a * w1a + u1a * v0b * w1a + u1a * v0a * w1b) * iso_101 +
-           (u1b * v1a * w0a + u1a * v1b * w0a + u1a * v1a * w0b) * iso_110 +
-           (u1b * v1a * w1a + u1a * v1b * w1a + u1a * v1a * w1b) * iso_111;
-
-    C[0] = u0a * v0a * w0a * iso_000 
-         + u0a * v0a * w1a * iso_001 
-         + u0a * v1a * w0a * iso_010 
-         + u0a * v1a * w1a * iso_011 
-         + u1a * v0a * w0a * iso_100 
-         + u1a * v0a * w1a * iso_101 
-         + u1a * v1a * w0a * iso_110 
-         + u1a * v1a * w1a * iso_111 
-         - isoValue;
-
-    // C[3] = u0b * v0b * w0b * (iso_000 + iso_001 + iso_010 + iso_011)
-    //      + u1b * v1b * w1b * (iso_100 + iso_101 + iso_110 + iso_111);
-
-    // C[2] = (u0a * v0b * w0b + u0b * v0a * w0b + u0b * v0b * w0a) * (iso_000 + iso_001 + iso_010 + iso_011)
-    //      + (u1a * v1b * w1b + u1b * v1a * w1b + u1b * v1b * w1a) * (iso_100 + iso_101 + iso_110 + iso_111);
-
-    // C[1] = (u0b * v0a * w0a + u0a * v0b * w0a + u0a * v0a * w0b) * (iso_000 + iso_001 + iso_010 + iso_011)
-    //      + (u1b * v1a * w1a + u1a * v1b * w1a + u1a * v1a * w1b) * (iso_100 + iso_101 + iso_110 + iso_111);
-
-    // C[0] = u0a * v0a * w0a * (iso_000 + iso_001 + iso_010 + iso_011)
-    //      + u1a * v1a * w1a * (iso_100 + iso_101 + iso_110 + iso_111) - isoValue;
-
-    double *S = new double[3];
-
-    int num = SolveCubic(C, S);
-
-    printf("isovalue %f\n", isoValue);
-    printf("num: %d\n", num);
-
-    double closestIntersection = -1;
-
-    for (int i = 0; i < num; i++)
+    // printf("t = %f\n", t);
+    // t > 0 intersection point
+    if (t > 0)
     {
+        // intersection point
+        intersectP = ray.start + ray.dir * t;
 
-        printf("S[%d]: %f\n", i, S[i]);
-
-        if (closestIntersection < 0 && S[i] > 0)
+        // check if inside the voxel
+        if (IsInsideTriangle(p0, p1, p4, intersectP) || IsInsideTriangle(p0, p4, p2, intersectP))
         {
-            closestIntersection = S[i];
-        }
+            // printf("intersectP: %f %f %f\n", intersectP.x, intersectP.y, intersectP.z);
+            // printf("iso value %f\n", GetIsoValue(p0, p1, p4, p2, Iso_0, Iso_1, Iso_4, Iso_2, intersectP));
 
-        if (S[i] > 0 && S[i] < closestIntersection)
-        {
-            closestIntersection = S[i];
-        }
-    }
+            //  A1 = v1+v2+v3+v7-v6-v4-v5-v0
+            A1 = Iso_1 + Iso_2 + Iso_3 + Iso_7 - Iso_6 - Iso_4 - Iso_5 - Iso_0;
+            //  B1 = v4-v2-v1+v0
+            B1 = Iso_4 - Iso_2 - Iso_1 + Iso_0;
+            //  C1 = v6-v3-v1+v0
+            C1 = Iso_6 - Iso_3 - Iso_1 + Iso_0;
+            //  D1 = v5-v3-v2+v0
+            D1 = Iso_5 - Iso_3 - Iso_2 + Iso_0;
+            //  E1 = v1-v0
+            E1 = Iso_1 - Iso_0;
+            //  F1 = v2-v0
+            F1 = Iso_2 - Iso_0;
+            //  G1 = v3-v0
+            G1 = Iso_3 - Iso_0;
+            //  H1 = v0
+            H1 = Iso_0;
 
-    if (closestIntersection < 0)
-    {
-        // No intersection
-    }
-    else
-    {
-        hit.t = closestIntersection;
-        hit.position = ray.start + ray.dir * hit.t;
-        hit.material = material;
+            M[3] = A1 * ray.dir.x * ray.dir.y * ray.dir.z;
+            M[2] = A1 * (ray.dir.x * ray.dir.y * intersectP.z + ray.dir.x * ray.dir.z * intersectP.y + ray.dir.y * ray.dir.z * intersectP.x)
+                    + B1 * ray.dir.x * ray.dir.y + C1 * ray.dir.x * ray.dir.z + D1 * ray.dir.y * ray.dir.z;
+            M[1] = ray.dir.x * (A1 * intersectP.y * intersectP.z + B1 * intersectP.y + D1 * intersectP.z + E1)
+                 + ray.dir.y * (A1 * intersectP.x * intersectP.z + B1 * intersectP.x + C1 * intersectP.z + F1)
+                 + ray.dir.z * (A1 * intersectP.x * intersectP.y + C1 * intersectP.y + D1 * intersectP.x + G1);
+            M[0] = - isoValue + GetIsoValue(p0, p1, p4, p2, Iso_0, Iso_1, Iso_4, Iso_2, intersectP);
 
-        printf("hit.position: %f %f %f\n", hit.position.x, hit.position.y, hit.position.z);
+            // printf("M: %f %f %f %f\n", M[0], M[1], M[2], M[3]);
 
-        /*
-    	 * Calculate the normal later
-    	 */
-        //hit.normal = (hit.position - center) / radius;
-    }
+            // if M[3] != 0 // cubic equation
+            if (M[3] != 0)
+            {
+                // cubic
+                numSols = SolveCubic(M, S);
+                for (int i = 0; i < numSols; i++)
+                {
 
-    delete[] C;
-    delete[] S;
+                    // printf("S[%d]: %.10lf\n", i, S[i]);
 
-    // printf("%f\n", closestIntersection);
+                    if (closestIntersection < 0 && S[i] > 0)
+                    {
+                        closestIntersection = S[i];
+                    }
+
+                    if (S[i] > 0 && S[i] < closestIntersection)
+                    {
+                        closestIntersection = S[i];
+                    }
+                }
+            }
+            else if (M[2] != 0)
+            {
+                // quadratic
+                numSols = SolveQuadric(&M[1], S);
+                for (int i = 0; i < numSols; i++)
+                {
+
+                    // printf("S[%d]: %.10lf\n", i, S[i]);
+
+                    if (closestIntersection < 0 && S[i] > 0)
+                    {
+                        closestIntersection = S[i];
+                    }
+
+                    if (S[i] > 0 && S[i] < closestIntersection)
+                    {
+                        closestIntersection = S[i];
+                    }
+                }
+            }
+            else
+            {
+                // linear
+                if (M[1] != 0)
+                {
+                    closestIntersection = -M[0] / M[1];
+                }
+            }
+
+            if (closestIntersection < 0)
+            {
+                // No intersection
+            }
+            else
+            {
+                hit.t = closestIntersection;
+                hit.position = intersectP + ray.dir * hit.t;
+                hit.material = material;
+
+                // printf("hit.position: %f %f %f\n", hit.position.x, hit.position.y, hit.position.z);
+
+                /*
+                * Calculate the normal later
+                */
+                //hit.normal = (hit.position - center) / radius;
+            }
+
+        }   // inside the voxel
+    }   // t > 0
+
+    closestIntersection = -1;
+    // printf("---------------------------------------\n");
     return hit;
 }
