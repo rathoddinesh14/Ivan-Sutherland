@@ -14,6 +14,9 @@ public:
     int gridHeight;
     float min, max;
 
+    // front face of the voxel
+    Vector3f tl, tr, bl, br;
+
     // store address of child nodes in vector
     std::vector<Node *> child;
     bool isLeaf;

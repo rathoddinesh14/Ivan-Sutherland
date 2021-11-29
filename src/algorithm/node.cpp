@@ -19,9 +19,19 @@ void Node::operator+=(Node *other)
             this->max = other->max;
         if (other->min < this->min)
             this->min = other->min;
+
+
+        // TODO: logic for tl, tr, bl, br
+        if (other->tl.x <= this->tl.x && other->tl.y >= this->tl.y && other->tl.z >= this->tl.z)
+            this->tl = other->tl;
+        if (other->tr.x >= this->tr.x && other->tr.y >= this->tr.y && other->tr.z >= this->tr.z)
+            this->tr = other->tr;
+        if (other->bl.x <= this->bl.x && other->bl.y <= this->bl.y && other->bl.z >= this->bl.z)
+            this->bl = other->bl;
+        if (other->br.x >= this->br.x && other->br.y <= this->br.y && other->br.z >= this->br.z)
+            this->br = other->br;
     }
 }
-
 
 static float Iso_0 = 0, Iso_1 = 0, Iso_2 = 0, Iso_3 = 0;
 static float Iso_4 = 0, Iso_5 = 0, Iso_6 = 0, Iso_7 = 0;
@@ -145,7 +155,7 @@ Hit Node::intersect(const Ray &ray)
                 for (int i = 0; i < numSols; i++)
                 {
 
-                    // printf("S[%d]: %.10lf\n", i, S[i]);
+                    // if (S[i] > 0) printf("S[%d]: %.10lf\n", i, S[i]);
 
                     if (closestIntersection < 0 && S[i] > 0)
                     {
@@ -157,6 +167,7 @@ Hit Node::intersect(const Ray &ray)
                         closestIntersection = S[i];
                     }
                 }
+                // if (closestIntersection > 0) printf("closestIntersection: %.10lf\n\n", closestIntersection);
             }
             else if (M[2] != 0)
             {

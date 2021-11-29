@@ -44,6 +44,13 @@ Node* DomainSearch::buildOctree(int x, int y, int z, int ex, int ey, int ez, flo
         node->gridHeight = h;
         node->gridData = vertices;
         node->isLeaf = true;
+        node->tl = vertices[2 * index1];
+        node->tr = vertices[2 * index2];
+        node->bl = vertices[2 * index5];
+        node->br = vertices[2 * index6];
+
+        // todo: logic for calculating tl, tr, bl, br
+
         return node;
     }
 
@@ -57,6 +64,23 @@ Node* DomainSearch::buildOctree(int x, int y, int z, int ex, int ey, int ez, flo
 
     // create a node with float min and max
     Node *node = new Node(__FLT_MAX__, -__FLT_MAX__);
+    
+    node->tl.x = __FLT_MAX__;
+    node->tl.y = -__FLT_MAX__;
+    node->tl.z = -__FLT_MAX__;
+
+    node->tr.x = -__FLT_MAX__;
+    node->tr.y = -__FLT_MAX__;
+    node->tr.z = -__FLT_MAX__;
+    
+    node->bl.x = __FLT_MAX__;
+    node->bl.y = __FLT_MAX__;
+    node->bl.z = -__FLT_MAX__;
+    
+    node->br.x = -__FLT_MAX__;
+    node->br.y = __FLT_MAX__;
+    node->br.z = -__FLT_MAX__;
+
     *node += buildOctree(x, y, z, mx, my, mz, data, w, h);
     *node += buildOctree(mx, y, z, ex, my, mz, data, w, h);
     *node += buildOctree(x, my, z, mx, ey, mz, data, w, h);
@@ -69,23 +93,23 @@ Node* DomainSearch::buildOctree(int x, int y, int z, int ex, int ey, int ez, flo
     return node;
 }
 
-vector<Node *> DomainSearch::getNodes(float isovalue, Node *root)
+vector<Node *> DomainSearch::getNodes(float isovalue, Node *node)
 {
     vector<Node *> nodes;
 
-    if (root == NULL)
+    if (node == NULL)
         return nodes;
 
-    if (root->min <= isovalue && root->max >= isovalue)
+    if (node->min <= isovalue && node->max >= isovalue)
     {
-        if (root->isLeaf)
-            nodes.push_back(root);
+        if (node->isLeaf)
+            nodes.push_back(node);
 
-        for (unsigned int i = 0; i < root->child.size(); i++)
+        for (unsigned int i = 0; i < node->child.size(); i++)
         {
-            if (root->child[i]->min <= isovalue && root->child[i]->max >= isovalue)
+            if (node->child[i]->min <= isovalue && node->child[i]->max >= isovalue)
             {
-                vector<Node *> childNodes = getNodes(isovalue, root->child[i]);
+                vector<Node *> childNodes = getNodes(isovalue, node->child[i]);
                 nodes.insert(nodes.end(), childNodes.begin(), childNodes.end());
             }
         }
@@ -97,4 +121,83 @@ vector<Node *> DomainSearch::getNodes(float isovalue, Node *root)
 vector<Node *> DomainSearch::getNodes(float isovalue)
 {
     return getNodes(isovalue, root);
+}
+
+static Vector3f ds_p0, ds_p1, ds_p2, ds_p4, ds_intersectP;
+double ds_plane[4];
+static Hit ds_hit;
+static float ds_num, ds_denom;
+
+void DomainSearch::rayIntersection(Ray& ray, float isovalue, Node *node, Hit *hit)
+{
+    if (node == NULL)
+        return;
+    
+    if (node->min <= isovalue && node->max >= isovalue)
+    {
+        // TODO: ray hits leaf node
+        if (node->isLeaf)
+        {
+            ds_hit = node->intersect(ray);
+            // ds_hit.position.Print();
+            // printf("\n");
+            if (ds_hit.t > 0 && (hit->t < 0 || ds_hit.t < hit->t))
+            {
+                hit->position = ds_hit.position;
+                hit->t = ds_hit.t;
+                hit->normal = ds_hit.normal;
+                hit->material = ds_hit.material;
+                // printf("hit position %f %f %f\n", hit->position.x, hit->position.y, hit->position.z);
+            }
+        }
+        else
+        {
+            GetPlane(ds_plane, node->tl, Vector3f(0.0f, 0.0f, 1.0f));
+
+            // TODO: logic for intersection with plane
+            // finding intersection
+            // printf("%f %f %f %f\n", ds_plane[0], ds_plane[1], ds_plane[2], ds_plane[3]);
+            // printf("%f %f %f\n", ray.start.x, ray.start.y, ray.start.z);
+            // printf("%f %f %f\n", ray.dir.x, ray.dir.y, ray.dir.z);
+            ds_num = - (ds_plane[3] * ray.start.x + ds_plane[2] * ray.start.y + ds_plane[1] * ray.start.z + ds_plane[0]);
+            ds_denom = ds_plane[3] * ray.dir.x + ds_plane[2] * ray.dir.y + ds_plane[1] * ray.dir.z;
+            if (ds_denom != 0.0)
+            {
+                float t = ds_num / ds_denom;
+                if (t < 0)
+                    return;
+                else
+                {
+                    ds_intersectP = ray.start + ray.dir * t;
+
+                    // check if the intersection point is inside the triangle
+                    if (IsInsideTriangle(node->bl, node->br, node->tr, ds_intersectP) || 
+                            IsInsideTriangle(node->bl, node->tr, node->tl, ds_intersectP))
+                    {
+                        // TODO : recursive call
+                        for (unsigned int i = 0; i < node->child.size(); i++)
+                        {
+                            if (node->child[i]->min <= isovalue && node->child[i]->max >= isovalue)
+                            {
+                                rayIntersection(ray, isovalue, node->child[i], hit);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+}
+
+void DomainSearch::rayIntersection(Ray& ray, float isovalue, Hit *hit)
+{
+    return rayIntersection(ray, isovalue, root, hit);
 }

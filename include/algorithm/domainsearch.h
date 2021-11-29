@@ -30,6 +30,14 @@ public:
     vector<Node *> getNodes(float isovalue, Node *root);
 
     vector<Node *> getNodes(float isovalue);
+
+    /**
+     * @brief ray intersection with the sub domain
+     * @input: ray, iso value, Node
+     * @output: void
+     */
+    void rayIntersection(Ray& ray, float isovalue, Node *node, Hit *hit);
+    void rayIntersection(Ray& ray, float isovalue, Hit *hit);
 };
 
 #endif // __DOMAINSEARCH_H__
