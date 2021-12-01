@@ -21,7 +21,7 @@ VolumeRender::VolumeRender(char *rawFile)
 
      isoVal = minVal;
     stepSize = (maxVal - minVal) / 100;
-    unsigned int *indices = new unsigned int[depth * width * height];
+    // unsigned int *indices = new unsigned int[depth * width * height];
 
     // initialize vertices with unit cube spread over the whole volume
     for (int i = 0; i < depth; i++)
@@ -37,7 +37,7 @@ VolumeRender::VolumeRender(char *rawFile)
                 int index = i * width * height + j * width + k;
                 vertices[2 * index] = Vector3f(x-0.5, z-0.5, y-0.5);
                 vertices[2 * index + 1] = Vector3f(data[index]);
-                indices[index] = 2 * index;
+                // indices[index] = 2 * index;
             }
         }
     }

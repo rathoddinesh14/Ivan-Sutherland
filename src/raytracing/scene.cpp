@@ -8,7 +8,7 @@ camera(camera), ambientLight(ambientLight), width(width), height(height), volume
 	float fov = 45 * M_PI / 180;
 	camera->set(eye, lookat, vup, fov, width, height);
 
-	lights.push_back(new Light(Vector3f(1, 1, 1), ambientLight));
+	lights.push_back(new Light(Vector3f(-1, 1, 1), ambientLight));
 
 	Vector3f ks(2, 2, 2);
 
@@ -97,19 +97,19 @@ Vector3f Scene::trace(Ray ray, int depth = 0)
 	if (hit.material->type == ROUGH)
 	{
 		Vector3f outRadiance = hit.material->ka * ambientLight;
-		// for (Light *light : lights)
-		// {
-		// 	Ray shadowRay(hit.position + hit.normal * epsilon, light->direction);
-		// 	float cosTheta = hit.normal.Dot(light->direction);
-		// 	if (cosTheta > 0 && !shadowIntersect(shadowRay))
-		// 	{ // shadow computation
-		// 		outRadiance = outRadiance + light->emittence * hit.material->kd * cosTheta;
-		// 		Vector3f halfway = (light->direction - ray.dir).Normalize();
-		// 		float cosDelta = hit.normal.Dot(halfway);
-		// 		if (cosDelta > 0)
-		// 			outRadiance = outRadiance + light->emittence * hit.material->ks * powf(cosDelta, hit.material->shininess);
-		// 	}
-		// }
+		for (Light *light : lights)
+		{
+			Ray shadowRay(hit.position + hit.normal * epsilon, light->direction);
+			float cosTheta = hit.normal.Dot(light->direction);
+			if (cosTheta > 0 && !shadowIntersect(shadowRay))
+			{ // shadow computation
+				outRadiance = outRadiance + light->emittence * hit.material->kd * cosTheta;
+				Vector3f halfway = (light->direction - ray.dir).Normalize();
+				float cosDelta = hit.normal.Dot(halfway);
+				if (cosDelta > 0)
+					outRadiance = outRadiance + light->emittence * hit.material->ks * powf(cosDelta, hit.material->shininess);
+			}
+		}
 		return outRadiance;
 	}
 

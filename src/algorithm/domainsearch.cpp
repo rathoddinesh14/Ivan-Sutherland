@@ -48,6 +48,10 @@ Node* DomainSearch::buildOctree(int x, int y, int z, int ex, int ey, int ez, flo
         node->tr = vertices[2 * index2];
         node->bl = vertices[2 * index5];
         node->br = vertices[2 * index6];
+        node->btl = vertices[2 * index4];
+        node->btr = vertices[2 * index3];
+        node->bbl = vertices[2 * index8];
+        node->bbr = vertices[2 * index7];
 
         // todo: logic for calculating tl, tr, bl, br
 
@@ -80,6 +84,22 @@ Node* DomainSearch::buildOctree(int x, int y, int z, int ex, int ey, int ez, flo
     node->br.x = -__FLT_MAX__;
     node->br.y = __FLT_MAX__;
     node->br.z = -__FLT_MAX__;
+
+    node->btl.x = __FLT_MAX__;
+    node->btl.y = -__FLT_MAX__;
+    node->btl.z = __FLT_MAX__;
+
+    node->btr.x = -__FLT_MAX__;
+    node->btr.y = -__FLT_MAX__;
+    node->btr.z = __FLT_MAX__;
+    
+    node->bbl.x = __FLT_MAX__;
+    node->bbl.y = __FLT_MAX__;
+    node->bbl.z = __FLT_MAX__;
+    
+    node->bbr.x = -__FLT_MAX__;
+    node->bbr.y = __FLT_MAX__;
+    node->bbr.z = __FLT_MAX__;
 
     *node += buildOctree(x, y, z, mx, my, mz, data, w, h);
     *node += buildOctree(mx, y, z, ex, my, mz, data, w, h);
@@ -130,11 +150,17 @@ static float ds_num, ds_denom;
 
 void DomainSearch::rayIntersection(Ray& ray, float isovalue, Node *node, Hit *hit)
 {
+
+    // cout << "rayIntersection" << endl;
+
     if (node == NULL)
         return;
     
     if (node->min <= isovalue && node->max >= isovalue)
     {
+
+        // cout << "node->min <= isovalue && node->max >= isovalue" << endl;
+
         // TODO: ray hits leaf node
         if (node->isLeaf)
         {
@@ -152,21 +178,15 @@ void DomainSearch::rayIntersection(Ray& ray, float isovalue, Node *node, Hit *hi
         }
         else
         {
+            // front face
             GetPlane(ds_plane, node->tl, Vector3f(0.0f, 0.0f, 1.0f));
-
             // TODO: logic for intersection with plane
-            // finding intersection
-            // printf("%f %f %f %f\n", ds_plane[0], ds_plane[1], ds_plane[2], ds_plane[3]);
-            // printf("%f %f %f\n", ray.start.x, ray.start.y, ray.start.z);
-            // printf("%f %f %f\n", ray.dir.x, ray.dir.y, ray.dir.z);
             ds_num = - (ds_plane[3] * ray.start.x + ds_plane[2] * ray.start.y + ds_plane[1] * ray.start.z + ds_plane[0]);
             ds_denom = ds_plane[3] * ray.dir.x + ds_plane[2] * ray.dir.y + ds_plane[1] * ray.dir.z;
             if (ds_denom != 0.0)
             {
                 float t = ds_num / ds_denom;
-                if (t < 0)
-                    return;
-                else
+                if (t >= 0)
                 {
                     ds_intersectP = ray.start + ray.dir * t;
 
@@ -182,16 +202,125 @@ void DomainSearch::rayIntersection(Ray& ray, float isovalue, Node *node, Hit *hi
                                 rayIntersection(ray, isovalue, node->child[i], hit);
                             }
                         }
-                    }
-                    else
-                    {
                         return;
                     }
                 }
             }
-            else
+
+            // top face
+            GetPlane(ds_plane, node->tl, Vector3f(0.0f, 1.0f, 0.0f));
+            // TODO: logic for intersection with plane
+            ds_num = - (ds_plane[3] * ray.start.x + ds_plane[2] * ray.start.y + ds_plane[1] * ray.start.z + ds_plane[0]);
+            ds_denom = ds_plane[3] * ray.dir.x + ds_plane[2] * ray.dir.y + ds_plane[1] * ray.dir.z;
+            if (ds_denom != 0.0)
             {
-                return;
+                float t = ds_num / ds_denom;
+                if (t >= 0)
+                {
+                    ds_intersectP = ray.start + ray.dir * t;
+
+                    // check if the intersection point is inside the triangle
+                    if (IsInsideTriangle(node->tl, node->tr, node->btr, ds_intersectP) || 
+                            IsInsideTriangle(node->tl, node->btr, node->btl, ds_intersectP))
+                    {
+                        // TODO : recursive call
+                        for (unsigned int i = 0; i < node->child.size(); i++)
+                        {
+                            if (node->child[i]->min <= isovalue && node->child[i]->max >= isovalue)
+                            {
+                                rayIntersection(ray, isovalue, node->child[i], hit);
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // left face
+            GetPlane(ds_plane, node->tl, Vector3f(-1.0f, 0.0f, 0.0f));
+            // TODO: logic for intersection with plane
+            ds_num = - (ds_plane[3] * ray.start.x + ds_plane[2] * ray.start.y + ds_plane[1] * ray.start.z + ds_plane[0]);
+            ds_denom = ds_plane[3] * ray.dir.x + ds_plane[2] * ray.dir.y + ds_plane[1] * ray.dir.z;
+            if (ds_denom != 0.0)
+            {
+                float t = ds_num / ds_denom;
+                if (t >= 0)
+                {
+                    ds_intersectP = ray.start + ray.dir * t;
+
+                    // check if the intersection point is inside the triangle
+                    if (IsInsideTriangle(node->bbl, node->bl, node->tl, ds_intersectP) || 
+                            IsInsideTriangle(node->bbl, node->tl, node->btl, ds_intersectP))
+                    {
+                        // TODO : recursive call
+                        for (unsigned int i = 0; i < node->child.size(); i++)
+                        {
+                            if (node->child[i]->min <= isovalue && node->child[i]->max >= isovalue)
+                            {
+                                rayIntersection(ray, isovalue, node->child[i], hit);
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // right face
+            GetPlane(ds_plane, node->tr, Vector3f(1.0f, 0.0f, 0.0f));
+            // TODO: logic for intersection with plane
+            ds_num = - (ds_plane[3] * ray.start.x + ds_plane[2] * ray.start.y + ds_plane[1] * ray.start.z + ds_plane[0]);
+            ds_denom = ds_plane[3] * ray.dir.x + ds_plane[2] * ray.dir.y + ds_plane[1] * ray.dir.z;
+            if (ds_denom != 0.0)
+            {
+                float t = ds_num / ds_denom;
+                if (t >= 0)
+                {
+                    ds_intersectP = ray.start + ray.dir * t;
+
+                    // check if the intersection point is inside the triangle
+                    if (IsInsideTriangle(node->br, node->bbr, node->btr, ds_intersectP) || 
+                            IsInsideTriangle(node->br, node->btr, node->tr, ds_intersectP))
+                    {
+                        // TODO : recursive call
+                        for (unsigned int i = 0; i < node->child.size(); i++)
+                        {
+                            if (node->child[i]->min <= isovalue && node->child[i]->max >= isovalue)
+                            {
+                                rayIntersection(ray, isovalue, node->child[i], hit);
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // bottom face
+            GetPlane(ds_plane, node->bl, Vector3f(0.0f, -1.0f, 0.0f));
+            // TODO: logic for intersection with plane
+            ds_num = - (ds_plane[3] * ray.start.x + ds_plane[2] * ray.start.y + ds_plane[1] * ray.start.z + ds_plane[0]);
+            ds_denom = ds_plane[3] * ray.dir.x + ds_plane[2] * ray.dir.y + ds_plane[1] * ray.dir.z;
+            if (ds_denom != 0.0)
+            {
+                float t = ds_num / ds_denom;
+                if (t >= 0)
+                {
+                    ds_intersectP = ray.start + ray.dir * t;
+
+                    // check if the intersection point is inside the triangle
+                    if (IsInsideTriangle(node->bbl, node->bbr, node->br, ds_intersectP) || 
+                            IsInsideTriangle(node->bbl, node->br, node->bl, ds_intersectP))
+                    {
+                        // TODO : recursive call
+                        for (unsigned int i = 0; i < node->child.size(); i++)
+                        {
+                            if (node->child[i]->min <= isovalue && node->child[i]->max >= isovalue)
+                            {
+                                rayIntersection(ray, isovalue, node->child[i], hit);
+                            }
+                        }
+                        return;
+                    }
+                }
             }
         }
     }

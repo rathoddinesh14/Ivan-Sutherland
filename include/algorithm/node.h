@@ -16,6 +16,7 @@ public:
 
     // front face of the voxel
     Vector3f tl, tr, bl, br;
+    Vector3f btl, btr, bbl, bbr;
 
     // store address of child nodes in vector
     std::vector<Node *> child;
