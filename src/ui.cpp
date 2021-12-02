@@ -1,6 +1,5 @@
 #include "include/common/ui.h"
-
-ui::UI::UI()
+ImVec4 bg_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);ui::UI::UI()
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -28,6 +27,7 @@ void ui::UI::newFrame()
 void ui::UI::render()
 {
     ImGui::Render();
+        glClearColor(bg_color.x * bg_color.w, bg_color.y * bg_color.w, bg_color.z * bg_color.w, bg_color.w);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
@@ -65,6 +65,14 @@ void ui::UI::widget()
     static int selected_item = 0;
     static const char *items[] = {"Naive technique", "Domain search technique"};
     ImGui::Combo("Algorithm", &selected_item, items, IM_ARRAYSIZE(items));
+     
+
+     //Background editor
+     ImGui::ColorEdit3("Background color", (float*)&bg_color);
+     
+     
+
+
 
     if (selected_item == 0)
     {
@@ -74,6 +82,7 @@ void ui::UI::widget()
     {
         volumeRender->setAlgo(1);
     }
+       
 
     ImGui::End();
 }
