@@ -98,13 +98,13 @@ void onInit(int argc, char *argv[])
 	/* by default the back ground color is black */
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	// camera = new Camera(theWindowWidth, theWindowHeight);
+	camera = new Camera(theWindowWidth, theWindowHeight);
 	volumeRender = new VolumeRender(rawFile);
-	// boundingBox = new BoundingBox();
-	// lightsrc = new LightSource();
-	// lightsrc->setPosition(Vector3f(-0.3f, 1.5f, 0.0f));
-	// volumeRender->setLightSrc(lightsrc);
-	// volumeRender->setCameraPos(camera.getPos());
+	boundingBox = new BoundingBox();
+	lightsrc = new LightSource();
+	lightsrc->setPosition(Vector3f(-0.3f, 1.5f, 0.0f));
+	volumeRender->setLightSrc(lightsrc);
+	volumeRender->setCameraPos(camera->getPos());
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -112,9 +112,9 @@ void onInit(int argc, char *argv[])
     // glEnable(GL_CULL_FACE);
     // glCullFace(GL_BACK);
 
-	// gui = new ui::UI();
-	// gui->setVolumeRender(volumeRender);
-	// arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
+	gui = new ui::UI();
+	gui->setVolumeRender(volumeRender);
+	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
 	rayTraceRender = new RayTraceRender(theWindowWidth, theWindowHeight);
 
 	// Node*grid = volumeRender->getNode();
@@ -124,22 +124,23 @@ void onInit(int argc, char *argv[])
 	// int depth = volumeRender->getDepth();
 	// float isoValue = volumeRender->getIsoValue();
 	scene = new Scene(Vector3f(0.1, 0.1, 0.1), theWindowWidth, theWindowHeight, volumeRender);
+	volumeRender->setScene(scene);
 }
 
 static void onDisplay()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// gui->newFrame();
+	gui->newFrame();
 
-	// camera->onRender();
-	// Matrix4f Proj;
-	// Proj.InitPersProjTransform(persProjInfo);
-	// Matrix4f MVP;
-	// MVP = Proj * camera.getMatrix() * arcball->getRotationMatrix();
+	camera->onRender();
+	Matrix4f Proj;
+	Proj.InitPersProjTransform(persProjInfo);
+	Matrix4f MVP;
+	MVP = Proj * camera->getMatrix() * arcball->getRotationMatrix();
 
-	// volumeRender->render(MVP, arcball->getRotationMatrix());
-	// boundingBox->render(MVP);
+	volumeRender->render(MVP, arcball->getRotationMatrix());
+	boundingBox->render(MVP);
 
 	// move light source along y-axis
 	// lightsrc->setPosition(Vector3f(lightsrc->getPosition().x,
@@ -147,14 +148,15 @@ static void onDisplay()
 	// 								lightsrc->getPosition().z));
 
 
-	// lightsrc->render(Proj * camera.getMatrix());
+	lightsrc->render(Proj * camera->getMatrix());
 
-	// gui->widget();
-	// gui->render();
-	std::vector<Vector4f> image(theWindowWidth * theWindowHeight);
-	scene->render(image);
-	rayTraceRender->loadTexture(image);
-	rayTraceRender->render();
+	gui->widget();
+	gui->render();
+
+	// std::vector<Vector4f> image(theWindowWidth * theWindowHeight);
+	// scene->render(image);
+	// rayTraceRender->loadTexture(image);
+	// rayTraceRender->render();
 
 	// glDisableVertexAttribArray(0);
 
@@ -213,8 +215,8 @@ static void onMouseMotion(int x, int y)
 {
 	/* notify window that it has to be re-rendered */
 	// camera.handleMouse(x, y);
-	// ImGui_ImplGLUT_MotionFunc(x, y);
-	// arcball->handleCursor(x, y);
+	ImGui_ImplGLUT_MotionFunc(x, y);
+	arcball->handleCursor(x, y);
 	glutPostRedisplay();
 }
 
@@ -231,8 +233,8 @@ static void onMouseButtonPress(int button, int state, int x, int y)
 		// Left button un pressed
 	}
 
-	// ImGui_ImplGLUT_MouseFunc(button, state, x, y);
-	// arcball->handleMouseButton(button, state, x, y);
+	ImGui_ImplGLUT_MouseFunc(button, state, x, y);
+	arcball->handleMouseButton(button, state, x, y);
 
 	/* notify window that it has to be re-rendered */
 	glutPostRedisplay();
@@ -243,8 +245,8 @@ static void onMouseButtonPress(int button, int state, int x, int y)
 
 static void onAlphaNumericKeyPress(unsigned char key, int x, int y)
 {
-	// camera->handleKeyboard(key);
-	// volumeRender->handleKeyboard(key);
+	camera->handleKeyboard(key);
+	volumeRender->handleKeyboard(key);
 
 	switch (key)
 	{
@@ -260,7 +262,7 @@ static void onAlphaNumericKeyPress(unsigned char key, int x, int y)
 	case 27:
 		exit(0);
 	}
-	// ImGui_ImplGLUT_KeyboardFunc(key, x, y);
+	ImGui_ImplGLUT_KeyboardFunc(key, x, y);
 	/* notify window that it has to be re-rendered */
 	glutPostRedisplay();
 }
@@ -269,8 +271,8 @@ static void onAlphaNumericKeyPress(unsigned char key, int x, int y)
    post: scene is updated and re-rendered */
 static void onSpecialKeyPress(int key, int x, int y)
 {
-	// camera->handleKeyboard(key);
-	// volumeRender->handleKeyboard(key);
+	camera->handleKeyboard(key);
+	volumeRender->handleKeyboard(key);
 
 	/* please do not change function of these keys */
 	switch (key)
@@ -284,17 +286,17 @@ static void onSpecialKeyPress(int key, int x, int y)
 			theWindowPositionY = glutGet((GLenum)(GLUT_WINDOW_Y));
 			glutFullScreen();
 			glViewport(0, 0, 1920, 1080);
-			// arcball->updateWindowSize(1920, 1080);
+			arcball->updateWindowSize(1920, 1080);
 		}
 		else
 		{
 			glViewport(0, 0, theWindowWidth, theWindowHeight);
-			// arcball->updateWindowSize(theWindowWidth, theWindowHeight);
+			arcball->updateWindowSize(theWindowWidth, theWindowHeight);
 			glutPositionWindow(theWindowPositionX, theWindowPositionY);
 		}
 		break;
 	}
-	// ImGui_ImplGLUT_SpecialFunc(key, x, y);
+	ImGui_ImplGLUT_SpecialFunc(key, x, y);
 	/* notify window that it has to be re-rendered */
 	glutPostRedisplay();
 }

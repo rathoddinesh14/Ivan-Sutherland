@@ -267,5 +267,12 @@ Hit Node::intersect(const Ray &ray)
 
     closestIntersection = -1;
     // printf("---------------------------------------\n");
+
+    // if (hit.t > 0)
+    // {
+    //     printf("hit.t: %f\n", hit.t);
+    //     printf("hit.position: %f %f %f\n", hit.position.x, hit.position.y, hit.position.z);
+    // }
+
     return hit;
 }

@@ -25,6 +25,8 @@ struct Light
 	}
 };
 
+class VolumeRender;
+
 class Scene
 {
 	std::vector<Intersectable*> objects;
@@ -42,7 +44,7 @@ class Scene
 		Scene(Vector3f ambientLight, int width, int height, VolumeRender *vr);
 		bool shadowIntersect(Ray ray);
 		void addObject(Intersectable*object);
-		void render(std::vector<Vector4f>& image);
+		void render(std::vector<Vector4f> *image);
 		Vector3f trace(Ray ray, int depth);
 		Hit intersect(Ray ray);
 		void Animate(float dt);

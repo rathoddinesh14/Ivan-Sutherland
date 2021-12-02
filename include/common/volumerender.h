@@ -2,6 +2,7 @@
 #define __VOLUMERENDER_H
 
 #include <GL/glew.h>
+#include "include/raytracing/scene.h"
 #include <vector>
 #include "math_utils.h"
 #include "shader.h"
@@ -10,6 +11,8 @@
 #include "lightsource.h"
 #include "domainsearch.h"
 #include "chrono"
+
+class Scene;
 
 class VolumeRender
 {
@@ -32,6 +35,7 @@ class VolumeRender
     LightSource *lightSrc;
     DomainSearch *domainSearch;
     int algo = 0;   // marching tetrahedra is default
+    Scene *scene;
 
 public:
     VolumeRender(char *rawFile);
@@ -66,6 +70,10 @@ public:
 
     // get domain search object
     DomainSearch* getDomainSearch();
+
+    void addIsoPoint(Vector3f point);
+
+    void setScene(Scene *scene);
 };
 
 #endif

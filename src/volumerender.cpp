@@ -9,13 +9,13 @@ VolumeRender::VolumeRender(char *rawFile)
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
-    // width = 3;
-    // height = 3;
-    // depth = 3;
-    // minVal = 4;
-    // maxVal = 14;
-    // float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
+    // float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+    width = 3;
+    height = 3;
+    depth = 3;
+    minVal = 4;
+    maxVal = 14;
+    float data[] = {4, 5, 6, 6, 5, 7, 7, 5, 8, 8, 5, 9, 9, 5, 10, 10, 5, 11, 11, 5, 12, 12, 5, 13, 13, 5, 14};
 
     vertices = new Vector3f[2 * depth * width * height];
 
@@ -58,7 +58,7 @@ VolumeRender::VolumeRender(char *rawFile)
     glBindVertexArray(0);
 
     // clear the data
-    delete[] data;
+    // delete[] data;
 
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
@@ -88,9 +88,9 @@ void VolumeRender::render(Matrix4f VP, Matrix4f Model)
     glUseProgram(ShaderProgram);
     Matrix4f trans;
     trans.InitIdentity();
-    trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
+    trans.InitTranslationTransform(0.0f, 0.0f, 0.0f);
     trans = VP * trans;
-    Model = Model * trans;
+    Model = Model * VP;
     glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &Model.m[0][0]);
     glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
     glUniform1f(gIsoVal, isoVal);
@@ -110,8 +110,9 @@ void VolumeRender::render(Matrix4f VP, Matrix4f Model)
     // glPointSize(5);
     // cout << "isoPoints size: " << isoPoints.size() << endl;
 
-    glDrawArrays(GL_TRIANGLES, 0, isoPoints.size());
-    // glDrawElements(GL_POINTS, depth * width * height, GL_UNSIGNED_INT, 0);
+    // glDrawArrays(GL_TRIANGLES, 0, isoPoints.size());
+    // glDrawElements(GL_POINTS, isoPoints.size(), GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_POINTS, 0, isoPoints.size());
     glBindVertexArray(0);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -195,7 +196,7 @@ void VolumeRender::updateVBO()
             }
         }
     }
-    else
+    else if (algo == 1)
     {
         // domain search
         // get nodes in the octree
@@ -207,6 +208,12 @@ void VolumeRender::updateVBO()
                 isoPoints.push_back(p);
             }
         }
+    }
+    else if (algo == 2)
+    {
+        // ray tracing
+        scene->setIsoValue(this->isoVal);
+        scene->render(0);
     }
     chrono::steady_clock::time_point end = chrono::steady_clock::now();
     chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(end - begin);
@@ -249,4 +256,14 @@ int VolumeRender::getDepth()
 DomainSearch* VolumeRender::getDomainSearch()
 {
     return domainSearch;
+}
+
+void VolumeRender::addIsoPoint(Vector3f isoPoints)
+{
+    this->isoPoints.push_back(isoPoints);
+}
+
+void VolumeRender::setScene(Scene *scene)
+{
+    this->scene = scene;
 }

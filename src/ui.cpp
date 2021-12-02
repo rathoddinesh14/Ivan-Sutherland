@@ -63,7 +63,7 @@ void ui::UI::widget()
 
     // drop down menu
     static int selected_item = 0;
-    static const char *items[] = {"Naive technique", "Domain search technique"};
+    static const char *items[] = {"Naive technique", "Domain search technique", "Ray Tracing"};
     ImGui::Combo("Algorithm", &selected_item, items, IM_ARRAYSIZE(items));
 
     if (selected_item == 0)
@@ -73,6 +73,10 @@ void ui::UI::widget()
     else if (selected_item == 1)
     {
         volumeRender->setAlgo(1);
+    }
+    else if (selected_item == 2)
+    {
+        volumeRender->setAlgo(2);
     }
 
     ImGui::End();
