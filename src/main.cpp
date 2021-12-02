@@ -26,7 +26,9 @@ ui::UI* gui;
 ArcBall *arcball;
 RayTraceRender *rayTraceRender = 0;
 
-char *theProgramTitle = "Volume rendering";
+//char *theProgramTitle = "Volume rendering";
+char TheProgramTitle[] = "Volume rendering";
+char *theProgramTitle =TheProgramTitle;
 int theWindowWidth = 700, theWindowHeight = 700;
 int theWindowPositionX = 40, theWindowPositionY = 40;
 bool isFullScreen = false;
@@ -54,6 +56,7 @@ Camera camera(theWindowWidth, theWindowHeight);
 /* Constants */
 const int ANIMATION_DELAY = 20; /* milliseconds between rendering */
 char *rawFile = "../../data/tooth_103x94x161_uint8.raw";
+//char *rawFile ="/home/ankit/Project/Ivan-Sutherland-main/data/hydrogenatom_128x128x128_uint8.raw";
 
 /********************************************************************
   Utility functions
