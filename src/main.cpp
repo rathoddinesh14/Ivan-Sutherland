@@ -15,7 +15,6 @@
 #include "include/common/volumerender.h"
 #include "include/common/arcball.h"
 #include "include/common/ui.h"
-#include "include/raytracing/render.h"
 
 using namespace std;
 
@@ -24,7 +23,6 @@ using namespace std;
 
 ui::UI* gui;
 ArcBall *arcball;
-RayTraceRender *rayTraceRender = 0;
 
 char *theProgramTitle = "Volume rendering";
 int theWindowWidth = 700, theWindowHeight = 700;
@@ -111,8 +109,6 @@ void onInit(int argc, char *argv[])
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
 	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
-	rayTraceRender = new RayTraceRender(theWindowWidth, theWindowHeight);
-	
 }
 
 static void onDisplay()

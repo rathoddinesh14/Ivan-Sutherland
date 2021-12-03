@@ -18,8 +18,10 @@ class VolumeRender
     float minVal, maxVal;
     GLuint gWorldLoc, gIsoVal;
     GLuint iboXY = 0, iboXZ = 0, iboYZ = 0;
-    const char *pVSFileName = "shaders/marching tetrahedra/shader.vs";
-    const char *pFSFileName = "shaders/marching tetrahedra/shader.fs";
+    // const char *pVSFileName = "shaders/marching tetrahedra/shader.vs";
+    // const char *pFSFileName = "shaders/marching tetrahedra/shader.fs";
+    const char *pVSFileName = "shaders/ray casting/raycast.vs";
+    const char *pFSFileName = "shaders/ray casting/raycast.fs";
     float isoVal, stepSize;
     int moveZ = 0;
     int moveX = 0;
@@ -32,6 +34,7 @@ class VolumeRender
     LightSource *lightSrc;
     DomainSearch *domainSearch;
     int algo = 0;   // marching tetrahedra is default
+    GLuint volumeTex, volumeLoc;
 
 public:
     VolumeRender(char *rawFile);

@@ -10,6 +10,34 @@ VolumeRender::VolumeRender(char *rawFile)
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     float *data = loadRawData(rawFile, width, height, depth, minVal, maxVal);
+
+    // ***************** Texture *****************
+    glGenTextures(1, &volumeTex);
+    glBindTexture(GL_TEXTURE_3D, volumeTex);
+
+    // texture parameters
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    // mipmap parameters
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_BASE_LEVEL, 0);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAX_LEVEL, 4);
+
+    // texture data
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, width, height, depth, 0, GL_RED, GL_FLOAT, data);
+
+    // generate mipmaps
+    glGenerateMipmap(GL_TEXTURE_3D);
+
+    if (glGetError() == GL_NO_ERROR)
+        cout << "\033[33m" << "Volume texture loaded successfully" << "\033[0m" << endl;
+    else
+        cout << "\033[31m" << "Error loading volume texture" << "\033[0m" << endl;
+    // ***************** End of Texture *****************
+
     // width = 3;
     // height = 3;
     // depth = 3;
@@ -57,7 +85,7 @@ VolumeRender::VolumeRender(char *rawFile)
     glBindVertexArray(0);
 
     // clear the data
-    // delete[] data;
+    delete[] data;
 
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
@@ -84,6 +112,7 @@ VolumeRender::~VolumeRender()
 
 void VolumeRender::render(Matrix4f VP, Matrix4f Model)
 {
+    glEnable(GL_BLEND);
     glUseProgram(ShaderProgram);
     Matrix4f trans;
     trans.InitIdentity();
@@ -115,6 +144,7 @@ void VolumeRender::render(Matrix4f VP, Matrix4f Model)
     // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     glUseProgram(0);
+    glDisable(GL_BLEND);
 }
 
 void VolumeRender::handleKeyboard(unsigned char key)
