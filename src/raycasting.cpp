@@ -5,11 +5,11 @@ RaycastingRender::RaycastingRender(Camera *camera, char *rawFile)
     // Load the volume texture
     GLubyte *volumeData = loadRawDataInByte(rawFile, width, height, depth);
 
-    stepSize.x = 1.0f / (float)width;
-    stepSize.y = 1.0f / (float)height;
-    stepSize.z = 1.0f / (float)depth;
+    stepSize.x = 1.0f / width;
+    stepSize.y = 1.0f / height;
+    stepSize.z = 1.0f / depth;
 
-    // // Create the volume texture
+    // Create the volume texture
     glGenTextures(1, &volumeTex);
     glBindTexture(GL_TEXTURE_3D, volumeTex);
 
@@ -33,10 +33,10 @@ RaycastingRender::RaycastingRender(Camera *camera, char *rawFile)
     // Free the volume data
     delete[] volumeData;
 
-    // print in green
-    std::cout << "\033[0;32m"
-              << "Volume texture loaded successfully"
-              << "\033[0m" << std::endl;
+    // // print in green
+    // std::cout << "\033[0;32m"
+    //           << "Volume texture loaded successfully"
+    //           << "\033[0m" << std::endl;
 
     this->camera = camera;
 
@@ -88,27 +88,50 @@ RaycastingRender::RaycastingRender(Camera *camera, char *rawFile)
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
     gCamLoc = glGetUniformLocation(ShaderProgram, "camPos");
     volumeLoc = glGetUniformLocation(ShaderProgram, "volume");
+    isoValueLoc = glGetUniformLocation(ShaderProgram, "isoValue");
     stepSizeLoc = glGetUniformLocation(ShaderProgram, "step_size");
     glUniform1i(volumeLoc, 0);
 }
 
-void RaycastingRender::render(Matrix4f &VP, Matrix4f Model)
+void RaycastingRender::render(Matrix4f VP, Matrix4f Model)
 {
     glUseProgram(ShaderProgram);
     glEnable(GL_BLEND);
     glBindVertexArray(vao);
     //get the camera position
     Vector3f camPosition = camera->getPos();
+    // Matrix4f trans;
+    // trans.InitIdentity();
+    // // trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
+    // Model = Model * trans;
+    // trans = VP * trans;
+    // glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &Model.m[0][0]);
+    // glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
+
     Matrix4f trans;
     trans.InitIdentity();
     // trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
     trans = VP * trans;
+    Matrix4f undoTrans = Model.Inverse();
+    Vector4f originalCam = Vector4f(camPosition.x, camPosition.y, camPosition.z, 1.0);
+    originalCam = undoTrans * originalCam;
+    camPosition.x = originalCam.x;
+    camPosition.y = originalCam.y;
+    camPosition.z = originalCam.z;
     glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
     glUniform3fv(gCamLoc, 1, &camPosition.x);
-    glUniform3fv(stepSizeLoc, 1, &stepSize.x);
+    glUniform3f(stepSizeLoc, stepSize.x, stepSize.y, stepSize.z);
+    glUniform1i(volumeLoc, 0);
+    // pass float isovalue to shader
+    glUniform1f(isoValueLoc, isoValue);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
     glUseProgram(0);
     glDisable(GL_BLEND);
+}
+
+void RaycastingRender::setIsoValue(float value) 
+{
+    this->isoValue = value;
 }
 
 RaycastingRender::~RaycastingRender()

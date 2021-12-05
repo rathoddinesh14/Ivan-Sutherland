@@ -4,7 +4,7 @@ static int MARGIN = 10;
 static float EDGE_STEP = 1.0f;
 
 Camera::Camera(int w, int h):   
-                    pos(0.0f, 1.0f, -2.0f), 
+                    pos(0.0f, 0.0f, -2.0f), 
                     tar(0.0f, 0.0f, 1.0f),
                     Up(0.0f, 1.0f, 0.0f), speed(0.5f), width(w), height(h)
 {

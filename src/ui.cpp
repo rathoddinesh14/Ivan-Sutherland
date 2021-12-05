@@ -58,12 +58,53 @@ void ui::UI::widget()
     if (slider_value != volumeRender->getIsoValue())
     {
         volumeRender->setIsoValue(slider_value);
-        volumeRender->updateVBO();
+        if (volumeRender->getAlgo() != 2)
+            volumeRender->updateVBO();
+    }
+
+    // Anti aliasing with 0, 2, 4, 8, 16 samples
+    static int aa_samples = 0;
+    static const char *aa_items[] = {"0", "2", "4", "8", "16"};
+    ImGui::Combo("Anti Aliasing", &aa_samples, aa_items, IM_ARRAYSIZE(aa_items));
+
+    // change in anti aliasing
+    if (aa_samples == 0)
+    {
+        // disable anti aliasing
+        glDisable(GL_MULTISAMPLE);
+    }
+    else if (aa_samples == 1)
+    {
+        // enable 2x anti aliasing
+        glEnable(GL_MULTISAMPLE);
+        // set anti aliasing to 2x
+        glSampleCoverage(2.0f, GL_TRUE);
+    }
+    else if (aa_samples == 2)
+    {
+        // enable 4x anti aliasing
+        glEnable(GL_MULTISAMPLE);
+        // set anti aliasing to 4x
+        glSampleCoverage(4.0f, GL_TRUE);
+    }
+    else if (aa_samples == 3)
+    {
+        // enable 8x anti aliasing
+        glEnable(GL_MULTISAMPLE);
+        // set anti aliasing to 8x
+        glSampleCoverage(8.0f, GL_TRUE);
+    }
+    else if (aa_samples == 4)
+    {
+        // enable 16x anti aliasing
+        glEnable(GL_MULTISAMPLE);
+        // set anti aliasing to 16x
+        glSampleCoverage(16.0f, GL_TRUE);
     }
 
     // drop down menu
     static int selected_item = 0;
-    static const char *items[] = {"Naive technique", "Domain search technique"};
+    static const char *items[] = {"Naive technique", "Domain search technique", "GPU - Ray marching"};
     ImGui::Combo("Algorithm", &selected_item, items, IM_ARRAYSIZE(items));
 
     if (selected_item == 0)
@@ -73,6 +114,10 @@ void ui::UI::widget()
     else if (selected_item == 1)
     {
         volumeRender->setAlgo(1);
+    }
+    else if (selected_item == 2)
+    {
+        volumeRender->setAlgo(2);
     }
 
     ImGui::End();

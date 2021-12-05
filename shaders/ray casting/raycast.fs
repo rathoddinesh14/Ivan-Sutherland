@@ -1,4 +1,4 @@
-#version 410
+#version 410 core
 
 out vec4 vFragColor;	//fragment shader output
 
@@ -9,13 +9,14 @@ smooth in vec3 vUV;				//3D texture coordinates form vertex shader
 uniform sampler3D	volume;			//volume dataset
 uniform vec3		camPos;			//camera position
 uniform vec3		step_size;		//ray step size
+uniform float		isoValue;		//isosurface value
 
 //constants
 const int MAX_SAMPLES = 300;		//total samples for each ray march step
-const vec3 texMin = vec3(-1.0);		//minimum texture access coordinate
+const vec3 texMin = vec3(0.0);		//minimum texture access coordinate
 const vec3 texMax = vec3(1.0);		//maximum texture access coordinate
 const float DELTA = 0.001;			//the step size for gradient calculation
-const float isoValue = 50/255.0;	//the isovalue for iso-surface detection
+// const float isoValue = 50/255.0;	//the isovalue for iso-surface detection
 
 //function to give a more accurate position of where the given iso-value (iso) is found
 //given the initial minimum limit (left) and maximum limit (right)
@@ -84,6 +85,7 @@ void main()
 	//get the object space position by subracting 0.5 from the
 	//3D texture coordinates. Then subtraact it from camera position
 	//and normalize to get the ray marching direction
+	// vec3 camPos = vec3(1.0, 2.0, 3.0);
 	vec3 geomDir = normalize((vUV-vec3(0.5)) - camPos); 
 
 	//multiply the raymarching direction with the step size to get the
@@ -127,7 +129,7 @@ void main()
 			//location by using bisection based refinement.
 			vec3 xN = dataPos;
 			vec3 xF = dataPos+dirStep;	
-			vec3 tc = Bisection(xN, xF, isoValue);	
+			vec3 tc = Bisection(xN, xF, isoValue);
 	
 			//This returns the first hit surface
 			// vFragColor = make_float4(xN,1);

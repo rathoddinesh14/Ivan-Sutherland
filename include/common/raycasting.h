@@ -14,14 +14,19 @@ class RaycastingRender
     const char *pFSFileName = "shaders/ray casting/raycast.fs";
     Camera *camera;
     GLuint gWorldLoc, gCamLoc;
-    GLuint volumeTex, volumeLoc;
+    GLuint volumeTex, volumeLoc, isoValueLoc;
+    float isoValue;
     GLuint stepSizeLoc;
     Vector3f stepSize;
     int width, height, depth;
 
 public:
     RaycastingRender(Camera *camera, char *rawFile);
-    void render(Matrix4f &VP, Matrix4f Model);
+    void render(Matrix4f VP, Matrix4f Model);
+
+    // Getters and Setters
+    void setIsoValue(float value);
+
     ~RaycastingRender();
 };
 

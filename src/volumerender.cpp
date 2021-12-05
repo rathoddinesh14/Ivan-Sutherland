@@ -62,13 +62,13 @@ VolumeRender::VolumeRender(char *rawFile)
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
     gIsoVal = glGetUniformLocation(ShaderProgram, "isoValue");
-	gWorldTrans = glGetUniformLocation(ShaderProgram, "gWorldTrans");
-	gAmbientIntensityLoc = glGetUniformLocation(ShaderProgram, "ambientIntensity");
-	gDiffuseIntensityLoc = glGetUniformLocation(ShaderProgram, "diffuseIntensity");
-	glightSrcLoc = glGetUniformLocation(ShaderProgram, "lightSrc");
-	gSpecLightLoc = glGetUniformLocation(ShaderProgram, "specLight");
-	gSpecPowerLoc = glGetUniformLocation(ShaderProgram, "specPower");
-	gCamLoc = glGetUniformLocation(ShaderProgram, "camPos");
+    gWorldTrans = glGetUniformLocation(ShaderProgram, "gWorldTrans");
+    gAmbientIntensityLoc = glGetUniformLocation(ShaderProgram, "ambientIntensity");
+    gDiffuseIntensityLoc = glGetUniformLocation(ShaderProgram, "diffuseIntensity");
+    glightSrcLoc = glGetUniformLocation(ShaderProgram, "lightSrc");
+    gSpecLightLoc = glGetUniformLocation(ShaderProgram, "specLight");
+    gSpecPowerLoc = glGetUniformLocation(ShaderProgram, "specPower");
+    gCamLoc = glGetUniformLocation(ShaderProgram, "camPos");
 
     updateVBO();
 }
@@ -84,46 +84,55 @@ VolumeRender::~VolumeRender()
 
 void VolumeRender::render(Matrix4f VP, Matrix4f Model)
 {
-    glUseProgram(ShaderProgram);
-    Matrix4f trans;
-    trans.InitIdentity();
-    trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
-    trans = VP * trans;
-    Model = Model * trans;
-    glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &Model.m[0][0]);
-    glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
-    glUniform1f(gIsoVal, isoVal);
-    glUniform1f(gAmbientIntensityLoc, ambientLight);
-	glUniform1f(gDiffuseIntensityLoc, diffuseLight);
-	glUniform1f(gSpecPowerLoc, shininess);
-	glUniform1f(gSpecLightLoc, specularLight);
-    Vector3f ls = lightSrc->getPosition();
-	glUniform3fv(glightSrcLoc, 1, &ls.x);
-	glUniform3fv(gCamLoc, 1, &cameraPos.x);
 
-    glBindVertexArray(VAO);
-    // wire frame
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    // render using points
-    // point size is set to 5
-    // glPointSize(5);
-    // cout << "isoPoints size: " << isoPoints.size() << endl;
+    if (algo == 2)
+    {
+        this->raycastingRender->render(VP, Model);
+    }
+    else
+    {
+        glUseProgram(ShaderProgram);
+        Matrix4f trans;
+        trans.InitIdentity();
+        trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
+        trans = VP * trans;
+        Model = Model * trans;
+        glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &Model.m[0][0]);
+        glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
+        glUniform1f(gIsoVal, isoVal);
+        glUniform1f(gAmbientIntensityLoc, ambientLight);
+        glUniform1f(gDiffuseIntensityLoc, diffuseLight);
+        glUniform1f(gSpecPowerLoc, shininess);
+        glUniform1f(gSpecLightLoc, specularLight);
+        Vector3f ls = lightSrc->getPosition();
+        glUniform3fv(glightSrcLoc, 1, &ls.x);
+        glUniform3fv(gCamLoc, 1, &cameraPos.x);
 
-    glDrawArrays(GL_TRIANGLES, 0, isoPoints.size());
-    // glDrawElements(GL_POINTS, depth * width * height, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        glBindVertexArray(VAO);
+        // wire frame
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // render using points
+        // point size is set to 5
+        // glPointSize(5);
+        // cout << "isoPoints size: " << isoPoints.size() << endl;
 
-    glUseProgram(0);
+        glDrawArrays(GL_TRIANGLES, 0, isoPoints.size());
+        // glDrawElements(GL_POINTS, depth * width * height, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+        glUseProgram(0);
+    }
 }
 
 void VolumeRender::handleKeyboard(unsigned char key)
 {
 }
 
-void VolumeRender::setIsoValue(float val) 
+void VolumeRender::setIsoValue(float val)
 {
     this->isoVal = val;
+    this->raycastingRender->setIsoValue(val/this->maxVal);
 }
 
 float VolumeRender::getIsoValue() const
@@ -156,6 +165,11 @@ void VolumeRender::setAlgo(int algo)
     this->algo = algo;
 }
 
+int VolumeRender::getAlgo() const
+{
+    return this->algo;
+}
+
 void VolumeRender::updateVBO()
 {
     isoPoints.clear();
@@ -167,12 +181,12 @@ void VolumeRender::updateVBO()
         for (int i = 0; i < depth - 1; i++)
         {
             for (int j = 0; j < height - 1; j++)
-            {   
+            {
                 for (int k = 0; k < width - 1; k++)
                 {
                     int index = i * width * height + j * width + k;
                     vector<Vector3f> points = marchingtetrahedra::getIsoPoints(isoVal, index, vertices, width, height);
-                    for (int l = 0; l < points.size(); l+=3)
+                    for (int l = 0; l < points.size(); l += 3)
                     {
                         Vector3f p1 = points[l];
                         Vector3f p2 = points[l + 1];
@@ -218,4 +232,9 @@ void VolumeRender::updateVBO()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, isoPoints.size() * sizeof(Vector3f), &isoPoints[0], GL_STATIC_DRAW);
     glBindVertexArray(0);
+}
+
+void VolumeRender::setRaycastingRender(RaycastingRender *raycastingRender)
+{
+    this->raycastingRender = raycastingRender;
 }

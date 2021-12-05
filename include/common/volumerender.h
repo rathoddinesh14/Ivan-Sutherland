@@ -10,6 +10,9 @@
 #include "lightsource.h"
 #include "domainsearch.h"
 #include "chrono"
+#include "raycasting.h"
+
+class RaycastingRender;
 
 class VolumeRender
 {
@@ -31,7 +34,9 @@ class VolumeRender
     Vector3f cameraPos;
     LightSource *lightSrc;
     DomainSearch *domainSearch;
+    RaycastingRender *raycastingRender;
     int algo = 0;   // marching tetrahedra is default
+
 
 public:
     VolumeRender(char *rawFile);
@@ -51,6 +56,7 @@ public:
     float getMaxVal() const;
 
     void setAlgo(int algo);
+    int getAlgo() const;
 
     // after getting new iso points from marching cube, update the ibo
     void updateVBO();
@@ -58,6 +64,9 @@ public:
     void setLightSrc(LightSource *lightSrc);
 
     void setCameraPos(Vector3f cameraPos);
+
+    // set raycasting render
+    void setRaycastingRender(RaycastingRender *raycastingRender);
 };
 
 #endif
