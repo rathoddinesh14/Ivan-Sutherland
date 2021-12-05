@@ -35,7 +35,7 @@ static vector<string> split(const string &s, char delim)
     return result;
 }
 
-static GLubyte *loadRawDataInByte(const char *filepath, int &width, int &height, int &depth, float &minVal, float &maxVal)
+static GLubyte *loadRawDataInByte(const char *filepath, int &width, int &height, int &depth)
 {
     cout << "Loading raw file: " << filepath << endl;
 
@@ -77,14 +77,7 @@ static GLubyte *loadRawDataInByte(const char *filepath, int &width, int &height,
 
     infile.read(reinterpret_cast<char *>(data), width * height * depth * sizeof(GLubyte));
     infile.close();
-
-     // print 10 data points
-    for (int i = 0; i < 10; i++)
-    {
-        std::cout << data[i] << " ";
-    }
-    std::cout << std::endl;
-
+    
     return data;
 }
 

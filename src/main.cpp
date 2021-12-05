@@ -15,6 +15,7 @@
 #include "include/common/volumerender.h"
 #include "include/common/arcball.h"
 #include "include/common/ui.h"
+#include "include/common/raycasting.h"
 
 using namespace std;
 
@@ -23,6 +24,7 @@ using namespace std;
 
 ui::UI* gui;
 ArcBall *arcball;
+RaycastingRender *rcRender;
 
 char *theProgramTitle = "Volume rendering";
 int theWindowWidth = 700, theWindowHeight = 700;
@@ -101,6 +103,7 @@ void onInit(int argc, char *argv[])
 	volumeRender->setCameraPos(camera.getPos());
 
 	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // cull back faces
     // glEnable(GL_CULL_FACE);
@@ -109,6 +112,7 @@ void onInit(int argc, char *argv[])
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
 	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
+	rcRender = new RaycastingRender(&camera, rawFile);
 }
 
 static void onDisplay()
@@ -123,8 +127,9 @@ static void onDisplay()
 	Matrix4f MVP;
 	MVP = Proj * camera.getMatrix() * arcball->getRotationMatrix();
 
-	volumeRender->render(MVP, arcball->getRotationMatrix());
+	// volumeRender->render(MVP, arcball->getRotationMatrix());
 	boundingBox->render(MVP);
+	rcRender->render(MVP, arcball->getRotationMatrix());
 
 	// move light source along y-axis
 	// lightsrc->setPosition(Vector3f(lightsrc->getPosition().x,
