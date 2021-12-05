@@ -9,7 +9,7 @@ Node::Node(float min, float max)
 
 void Node::operator+=(Node *other)
 {
-    if (other != NULL)
+    if (other != 0)
     {
         this->child.push_back(other);
 

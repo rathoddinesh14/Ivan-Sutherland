@@ -15,7 +15,7 @@
 #include "include/common/volumerender.h"
 #include "include/common/arcball.h"
 #include "include/common/ui.h"
-#include "include/raytracing/render.h"
+#include "include/common/raycasting.h"
 
 using namespace std;
 
@@ -24,10 +24,10 @@ using namespace std;
 
 ui::UI* gui;
 ArcBall *arcball;
-RayTraceRender *rayTraceRender = 0;
+RaycastingRender *rcRender;
 
 char *theProgramTitle = "Volume rendering";
-int theWindowWidth = 700, theWindowHeight = 700;
+int theWindowWidth = 1000, theWindowHeight = 1000;
 int theWindowPositionX = 40, theWindowPositionY = 40;
 bool isFullScreen = false;
 bool isAnimating = true;
@@ -41,7 +41,7 @@ int vertsPerFace;
 float x1, x2, y_1, y2, z1, z2;
 GLuint cWorldLoc;
 Vector3f meshCenter;
-float FOV = 90.0f, zNear = 1.0f, zFar = 100.0f;
+float FOV = 45.0f, zNear = 1.0f, zFar = 100.0f;
 PersProjInfo persProjInfo = {FOV, theWindowWidth, theWindowHeight, zNear, zFar};
 GLuint ShaderProgram, texProgram;
 Cube *boundingBox = 0;
@@ -103,16 +103,13 @@ void onInit(int argc, char *argv[])
 	volumeRender->setCameraPos(camera.getPos());
 
 	glEnable(GL_DEPTH_TEST);
-
-    // cull back faces
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	gui = new ui::UI();
 	gui->setVolumeRender(volumeRender);
 	arcball = new ArcBall(theWindowWidth, theWindowHeight, 5.0f);
-	rayTraceRender = new RayTraceRender(theWindowWidth, theWindowHeight);
-	
+	rcRender = new RaycastingRender(&camera, rawFile);
+	volumeRender->setRaycastingRender(rcRender);
 }
 
 static void onDisplay()
@@ -129,6 +126,7 @@ static void onDisplay()
 
 	volumeRender->render(MVP, arcball->getRotationMatrix());
 	boundingBox->render(MVP);
+	// rcRender->render(MVP, arcball->getRotationMatrix());
 
 	// move light source along y-axis
 	// lightsrc->setPosition(Vector3f(lightsrc->getPosition().x,
@@ -136,7 +134,7 @@ static void onDisplay()
 	// 								lightsrc->getPosition().z));
 
 
-	lightsrc->render(Proj * camera.getMatrix());
+	// lightsrc->render(Proj * camera.getMatrix());
 
 	gui->widget();
 	gui->render();

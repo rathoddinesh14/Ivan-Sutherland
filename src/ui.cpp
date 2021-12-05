@@ -58,12 +58,13 @@ void ui::UI::widget()
     if (slider_value != volumeRender->getIsoValue())
     {
         volumeRender->setIsoValue(slider_value);
-        volumeRender->updateVBO();
+        if (volumeRender->getAlgo() != 2)
+            volumeRender->updateVBO();
     }
-
+    
     // drop down menu
     static int selected_item = 0;
-    static const char *items[] = {"Naive technique", "Domain search technique"};
+    static const char *items[] = {"Naive technique", "Domain search technique", "GPU - Ray marching"};
     ImGui::Combo("Algorithm", &selected_item, items, IM_ARRAYSIZE(items));
 
     if (selected_item == 0)
@@ -73,6 +74,10 @@ void ui::UI::widget()
     else if (selected_item == 1)
     {
         volumeRender->setAlgo(1);
+    }
+    else if (selected_item == 2)
+    {
+        volumeRender->setAlgo(2);
     }
 
     ImGui::End();
