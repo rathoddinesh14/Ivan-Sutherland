@@ -61,47 +61,7 @@ void ui::UI::widget()
         if (volumeRender->getAlgo() != 2)
             volumeRender->updateVBO();
     }
-
-    // Anti aliasing with 0, 2, 4, 8, 16 samples
-    static int aa_samples = 0;
-    static const char *aa_items[] = {"0", "2", "4", "8", "16"};
-    ImGui::Combo("Anti Aliasing", &aa_samples, aa_items, IM_ARRAYSIZE(aa_items));
-
-    // change in anti aliasing
-    if (aa_samples == 0)
-    {
-        // disable anti aliasing
-        glDisable(GL_MULTISAMPLE);
-    }
-    else if (aa_samples == 1)
-    {
-        // enable 2x anti aliasing
-        glEnable(GL_MULTISAMPLE);
-        // set anti aliasing to 2x
-        glSampleCoverage(2.0f, GL_TRUE);
-    }
-    else if (aa_samples == 2)
-    {
-        // enable 4x anti aliasing
-        glEnable(GL_MULTISAMPLE);
-        // set anti aliasing to 4x
-        glSampleCoverage(4.0f, GL_TRUE);
-    }
-    else if (aa_samples == 3)
-    {
-        // enable 8x anti aliasing
-        glEnable(GL_MULTISAMPLE);
-        // set anti aliasing to 8x
-        glSampleCoverage(8.0f, GL_TRUE);
-    }
-    else if (aa_samples == 4)
-    {
-        // enable 16x anti aliasing
-        glEnable(GL_MULTISAMPLE);
-        // set anti aliasing to 16x
-        glSampleCoverage(16.0f, GL_TRUE);
-    }
-
+    
     // drop down menu
     static int selected_item = 0;
     static const char *items[] = {"Naive technique", "Domain search technique", "GPU - Ray marching"};
