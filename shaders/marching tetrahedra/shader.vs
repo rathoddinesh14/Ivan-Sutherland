@@ -10,10 +10,13 @@ uniform mat4 gWorldTrans;
 // out vec3 vPosition;
 // out vec3 vNormal;
 
+out float z;
+
 void main()
 {  
 	//get the clipspace vertex position
 	gl_Position = MVP*vec4(Vertex, 1);
+	z = gl_Position.z;
 	// vNormal     = mat3(transpose(inverse(gWorldTrans))) * Normal;
 	// vPosition = vec3(gWorldTrans * vec4(Vertex, 1.0));
 }

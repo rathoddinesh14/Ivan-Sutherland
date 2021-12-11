@@ -26,7 +26,8 @@ ui::UI* gui;
 ArcBall *arcball;
 RaycastingRender *rcRender;
 
-char *theProgramTitle = "Volume rendering";
+char TheProgramTitle[] = "Volume Rendering";
+char *theProgramTitle =TheProgramTitle;
 int theWindowWidth = 1000, theWindowHeight = 1000;
 int theWindowPositionX = 40, theWindowPositionY = 40;
 bool isFullScreen = false;
