@@ -86,10 +86,10 @@ RaycastingRender::RaycastingRender(Camera *camera, char *rawFile)
     ShaderProgram = CompileShaders(pVSFileName, pFSFileName, nullptr);
     glUseProgram(ShaderProgram);
     gWorldLoc = glGetUniformLocation(ShaderProgram, "MVP");
-    gCamLoc = glGetUniformLocation(ShaderProgram, "camPos");
-    volumeLoc = glGetUniformLocation(ShaderProgram, "volume");
+    gCamLoc = glGetUniformLocation(ShaderProgram, "cameraPos");
+    volumeLoc = glGetUniformLocation(ShaderProgram, "volumeTexture");
     isoValueLoc = glGetUniformLocation(ShaderProgram, "isoValue");
-    stepSizeLoc = glGetUniformLocation(ShaderProgram, "step_size");
+    stepSizeLoc = glGetUniformLocation(ShaderProgram, "rayStepSize");
     glUniform1i(volumeLoc, 0);
 }
 
