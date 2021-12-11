@@ -1,5 +1,8 @@
 #include "include/common/ui.h"
 
+// // Default Backgroung color
+ImVec4 bg_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
+
 ui::UI::UI()
 {
     IMGUI_CHECKVERSION();
@@ -28,6 +31,7 @@ void ui::UI::newFrame()
 void ui::UI::render()
 {
     ImGui::Render();
+    glClearColor(bg_color.x * bg_color.w, bg_color.y * bg_color.w, bg_color.z * bg_color.w, bg_color.w);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
@@ -79,6 +83,10 @@ void ui::UI::widget()
     {
         volumeRender->setAlgo(2);
     }
+
+    //Background Color Editor
+    ImGui::ColorEdit3("Background Color", (float*)&bg_color); 
+
 
     ImGui::End();
 }
