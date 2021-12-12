@@ -93,6 +93,7 @@ RaycastingRender::RaycastingRender(Camera *camera, char *rawFile)
     glUniform1i(volumeLoc, 0);
 }
 
+// Model - arcball rotation matrix
 void RaycastingRender::render(Matrix4f VP, Matrix4f Model)
 {
     glUseProgram(ShaderProgram);
@@ -100,14 +101,7 @@ void RaycastingRender::render(Matrix4f VP, Matrix4f Model)
     glBindVertexArray(vao);
     //get the camera position
     Vector3f camPosition = camera->getPos();
-    // Matrix4f trans;
-    // trans.InitIdentity();
-    // // trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);
-    // Model = Model * trans;
-    // trans = VP * trans;
-    // glUniformMatrix4fv(gWorldTrans, 1, GL_TRUE, &Model.m[0][0]);
-    // glUniformMatrix4fv(gWorldLoc, 1, GL_TRUE, &trans.m[0][0]);
-
+   
     Matrix4f trans;
     trans.InitIdentity();
     // trans.InitTranslationTransform(-0.5f, -0.5f, -0.5f);

@@ -1,6 +1,6 @@
 #include "include/common/ui.h"
 
-// // Default Backgroung color
+// Default Backgroung color
 ImVec4 bg_color = ImVec4(0.0f, 0.0f, 0.0f, 1.00f);
 
 ui::UI::UI()

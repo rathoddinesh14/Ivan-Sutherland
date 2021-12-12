@@ -87,6 +87,7 @@ void VolumeRender::render(Matrix4f VP, Matrix4f Model)
 
     if (algo == 2)
     {
+        // ray casting
         this->raycastingRender->render(VP, Model);
     }
     else
@@ -185,25 +186,7 @@ void VolumeRender::updateVBO()
                 for (int k = 0; k < width - 1; k++)
                 {
                     int index = i * width * height + j * width + k;
-                    // vector<Vector3f> points = marchingtetrahedra::getIsoPoints(isoVal, index, vertices, width, height);
-                    // for (int l = 0; l < points.size(); l += 3)
-                    // {
-                    //     Vector3f p1 = points[l];
-                    //     Vector3f p2 = points[l + 1];
-                    //     Vector3f p3 = points[l + 2];
 
-                    //     // compute the normal of the triangle
-                    //     Vector3f normal = (p3 - p1).Cross(p2 - p1);
-                    //     normal.Normalize();
-
-                    //     // add the vertices to the isoPoints vector
-                    //     isoPoints.push_back(p1);
-                    //     isoPoints.push_back(normal);
-                    //     isoPoints.push_back(p2);
-                    //     isoPoints.push_back(normal);
-                    //     isoPoints.push_back(p3);
-                    //     isoPoints.push_back(normal);
-                    // }
                     for (auto p : marchingtetrahedra::getIsoPoints(isoVal, index, vertices, width, height))
                     {
                         isoPoints.push_back(p);

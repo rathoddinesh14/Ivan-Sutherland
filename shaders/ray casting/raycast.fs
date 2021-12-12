@@ -97,7 +97,7 @@ void main() {
 			// Light vector
 			vec3 L = V;
 
-			// fragCol =  PhongLighting(L,N,V, 250, vec3(0.5));
+			// fragCol =  Phong(L,N,V, 250, vec3(0.5));
 			fragCol = Phong(L, N, V, 250, isoPoint);
 			break;
 		}

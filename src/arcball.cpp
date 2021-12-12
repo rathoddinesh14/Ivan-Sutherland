@@ -10,7 +10,6 @@ ArcBall::ArcBall(int width, int height, GLfloat speed):
 
 ArcBall::~ArcBall() 
 {
-    
 }
 
 void ArcBall::handleMouseButton(int button, int state, int x, int y) 
@@ -44,6 +43,7 @@ void ArcBall::handleCursor(int x, int y)
     camAxis.Normalize();
 }
 
+// input is pixel coordinates
 Vector3f ArcBall::getNormalizedScreenCoord(int x, int y)
 {
     float xn = (2.0f * x) / (float)width - 1.0f;
