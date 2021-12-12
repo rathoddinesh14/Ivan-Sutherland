@@ -36,6 +36,8 @@ class VolumeRender
     DomainSearch *domainSearch;
     RaycastingRender *raycastingRender;
     int algo = 0;   // marching tetrahedra is default
+                    // 1 - domain search
+                    // 2 - raycasting
 
 
 public:
